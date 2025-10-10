@@ -57,30 +57,28 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="Basic: Iterative OpMode", group="Iterative OpMode")
 @Disabled
-public class BasicOpMode_Iterative extends OpMode
+public class Teleop extends OpMode
 {
-    // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftFrontDrive = null;
-    private DcMotor leftBackDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor rightBackDrive = null;
+    private DcMotor driveLF = null;
+    private DcMotor driveLB = null;
+    private DcMotor driveRF = null;
+    private DcMotor driveRB = null;
     IMU imu;
 
-    // Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightFrontDrive  = hardwareMap.get(DcMotor.class, "right_front_drive");
-        rightBackDrive  = hardwareMap.get(DcMotor.class, "right_back_drive");
+        driveLF  = hardwareMap.get(DcMotor.class, "left_front_drive");
+        driveLB  = hardwareMap.get(DcMotor.class, "left_back_drive");
+        driveRF  = hardwareMap.get(DcMotor.class, "right_front_drive");
+        driveRB  = hardwareMap.get(DcMotor.class, "right_back_drive");
 
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        driveLF.setDirection(DcMotor.Direction.REVERSE);
+        driveLB.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveRF.setDirection(DcMotor.Direction.FORWARD);
+        driveRB.setDirection(DcMotor.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");
@@ -92,25 +90,22 @@ public class BasicOpMode_Iterative extends OpMode
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
-
-    // Code to run REPEATEDLY after the driver hits INIT, but before they hit START
+    
     @Override
     public void init_loop() {
     }
-
-    // Code to run ONCE when the driver hits START
+    
     @Override
     public void start() {
         runtime.reset();
     }
-
-    // START-STOP
+    
     @Override
     public void loop() {
-        double leftFrontPower;
-        double leftBackPower;
-        double rightFrontPower;
-        double rightBackPower;
+        double powerLF;
+        double powerLB;
+        double powerRF;
+        double powerRB;
 
         if (false) { // change this to a button
             imu.resetYaw();
@@ -125,22 +120,21 @@ public class BasicOpMode_Iterative extends OpMode
         double rotatedY = driveX * Math.sin(botHeading) + driveY * Math.cos(botHeading);
 
         double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1);
-        leftFrontPower  = (rotatedY  + rotatedX + driveTurn) / denominator;
-        leftBackPower   = (rotatedY  - rotatedX + driveTurn) / denominator;
-        rightFrontPower = (-rotatedY - rotatedX - driveTurn) / denominator;
-        rightBackPower  = (-rotatedY + rotatedX - driveTurn) / denominator;
+        powerLF = (rotatedY  + rotatedX + driveTurn) / denominator;
+        powerLB = (rotatedY  - rotatedX + driveTurn) / denominator;
+        powerRF = (-rotatedY - rotatedX - driveTurn) / denominator;
+        powerRB = (-rotatedY + rotatedX - driveTurn) / denominator;
 
-        leftFrontDrive.setPower(leftFrontPower);
-        leftBackDrive.setPower(leftBackPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        rightBackDrive.setPower(rightBackPower);
+        driveLF.setPower(powerLF);
+        driveLB.setPower(powerLB);
+        driveRF.setPower(powerRF);
+        driveRB.setPower(powerRB);
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
-                leftFrontPower, leftBackPower, rightFrontPower, rightBackPower);
+                powerLF, powerLB, powerRF, powerRB);
     }
-
-    // Code to run ONCE after the driver hits STOP
+    
     @Override
     public void stop() {
     }
