@@ -42,7 +42,6 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="Drive", group="Teleop")
-@Disabled
 public class Teleop extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
@@ -54,16 +53,14 @@ public class Teleop extends OpMode
 
     @Override
     public void init() {
-        telemetry.addData("Status", "Initialized");
+        driveLF  = hardwareMap.get(DcMotor.class, "drive_lf");
+        driveLB  = hardwareMap.get(DcMotor.class, "drive_lb");
+        driveRF  = hardwareMap.get(DcMotor.class, "drive_rf");
+        driveRB  = hardwareMap.get(DcMotor.class, "drive_rb");
 
-        driveLF  = hardwareMap.get(DcMotor.class, "left_front_drive");
-        driveLB  = hardwareMap.get(DcMotor.class, "left_back_drive");
-        driveRF  = hardwareMap.get(DcMotor.class, "right_front_drive");
-        driveRB  = hardwareMap.get(DcMotor.class, "right_back_drive");
-
-        driveLF.setDirection(DcMotor.Direction.REVERSE);
-        driveLB.setDirection(DcMotorSimple.Direction.REVERSE);
-        driveRF.setDirection(DcMotor.Direction.FORWARD);
+        driveLF.setDirection(DcMotor.Direction.FORWARD);
+        driveLB.setDirection(DcMotor.Direction.REVERSE);
+        driveRF.setDirection(DcMotor.Direction.REVERSE);
         driveRB.setDirection(DcMotor.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
@@ -93,23 +90,29 @@ public class Teleop extends OpMode
         double powerRF;
         double powerRB;
 
-        if (false) { // change this to a button
+        if (gamepad1.left_bumper) {
             imu.resetYaw();
         }
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double driveY    = gamepad1.left_stick_y;
+        double driveY    = -gamepad1.left_stick_y;
         double driveX    = gamepad1.left_stick_x;
         double driveTurn = gamepad1.right_stick_x;
 
         double rotatedX = driveX * Math.cos(botHeading) - driveY * Math.sin(botHeading);
         double rotatedY = driveX * Math.sin(botHeading) + driveY * Math.cos(botHeading);
 
-        double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1);
-        powerLF = (rotatedY  + rotatedX + driveTurn) / denominator;
-        powerLB = (rotatedY  - rotatedX + driveTurn) / denominator;
-        powerRF = (-rotatedY - rotatedX - driveTurn) / denominator;
-        powerRB = (-rotatedY + rotatedX - driveTurn) / denominator;
+        double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1) * 2;
+        powerLF = (rotatedY + rotatedX + driveTurn) / denominator;
+        powerLB = (rotatedY - rotatedX + driveTurn) / denominator;
+        powerRF = (rotatedY - rotatedX - driveTurn) / denominator;
+        powerRB = (rotatedY + rotatedX - driveTurn) / denominator;
+        if (gamepad1.a) {
+            powerLF = 0.25;
+            powerLB = 0.25;
+            powerRF = 0.25;
+            powerRB = 0.25;
+        }
 
         driveLF.setPower(powerLF);
         driveLB.setPower(powerLB);
@@ -119,6 +122,7 @@ public class Teleop extends OpMode
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
+        telemetry.addData("Heading", botHeading / 3.14159 * 180);
     }
     
     @Override
