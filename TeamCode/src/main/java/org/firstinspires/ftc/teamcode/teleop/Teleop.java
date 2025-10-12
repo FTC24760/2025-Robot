@@ -30,14 +30,11 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -50,19 +47,19 @@ public class Teleop extends OpMode
     private DcMotor driveRF = null;
     private DcMotor driveRB = null;
     IMU imu;
-
+    double positionLF, positionLB, positionRF, positionRB;
+    double previousPositionLF, previousPositionLB, previousPositionRF, previousPositionRB;
+    double poseX, poseY;
     @Override
     public void init() {
-        driveLF  = hardwareMap.get(DcMotor.class, "drive_lf");
-        driveLB  = hardwareMap.get(DcMotor.class, "drive_lb");
-        driveRF  = hardwareMap.get(DcMotor.class, "drive_rf");
-        driveRB  = hardwareMap.get(DcMotor.class, "drive_rb");
-
+        driveLF = hardwareMap.get(DcMotor.class, "drive_lf");
+        driveLB = hardwareMap.get(DcMotor.class, "drive_lb");
+        driveRF = hardwareMap.get(DcMotor.class, "drive_rf");
+        driveRB = hardwareMap.get(DcMotor.class, "drive_rb");
         driveLF.setDirection(DcMotor.Direction.FORWARD);
         driveLB.setDirection(DcMotor.Direction.REVERSE);
         driveRF.setDirection(DcMotor.Direction.REVERSE);
         driveRB.setDirection(DcMotor.Direction.FORWARD);
-
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -81,14 +78,17 @@ public class Teleop extends OpMode
     @Override
     public void start() {
         runtime.reset();
+        poseX = 0;
+        poseY = 0;
     }
-    
+
     @Override
     public void loop() {
-        double powerLF;
-        double powerLB;
-        double powerRF;
-        double powerRB;
+        double powerLF, powerLB, powerRF, powerRB;
+        positionLF = driveLF.getCurrentPosition();
+        positionLB = driveLB.getCurrentPosition();
+        positionRF = driveRF.getCurrentPosition();
+        positionRB = driveRB.getCurrentPosition();
 
         if (gamepad1.left_bumper) {
             imu.resetYaw();
@@ -107,22 +107,31 @@ public class Teleop extends OpMode
         powerLB = (rotatedY - rotatedX + driveTurn) / denominator;
         powerRF = (rotatedY - rotatedX - driveTurn) / denominator;
         powerRB = (rotatedY + rotatedX - driveTurn) / denominator;
-        if (gamepad1.a) {
-            powerLF = 0.25;
-            powerLB = 0.25;
-            powerRF = 0.25;
-            powerRB = 0.25;
-        }
 
         driveLF.setPower(powerLF);
         driveLB.setPower(powerLB);
         driveRF.setPower(powerRF);
         driveRB.setPower(powerRB);
+        double deltaPositionLF = previousPositionLF - positionLF;
+        double deltaPositionLB = previousPositionLB - positionLB;
+        double deltaPositionRF = previousPositionRF - positionRF;
+        double deltaPositionRB = previousPositionRB - positionRB;
 
+        double relativeDeltaPositionY = -deltaPositionRF - deltaPositionRB - deltaPositionLF - deltaPositionLB;
+        double relativeDeltaPositionX = deltaPositionRF - deltaPositionRB - deltaPositionLF + deltaPositionLB;
+        poseX += relativeDeltaPositionX * Math.cos(botHeading) - relativeDeltaPositionY * Math.sin(botHeading);
+        poseY += relativeDeltaPositionX * Math.sin(botHeading) + relativeDeltaPositionY * Math.cos(botHeading);
+        
+        
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
         telemetry.addData("Heading", botHeading / 3.14159 * 180);
+        telemetry.addData("Pose", "x: (%.2f) y: (%.2f)", poseX, poseY);
+        previousPositionLF = positionLF;
+        previousPositionLB = positionLB;
+        previousPositionRF = positionRF;
+        previousPositionRB = positionRB;
     }
     
     @Override
