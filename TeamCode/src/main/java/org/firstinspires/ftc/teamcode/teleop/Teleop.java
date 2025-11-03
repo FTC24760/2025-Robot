@@ -56,9 +56,9 @@ public class Teleop extends OpMode
         driveLB = hardwareMap.get(DcMotor.class, "drive_lb");
         driveRF = hardwareMap.get(DcMotor.class, "drive_rf");
         driveRB = hardwareMap.get(DcMotor.class, "drive_rb");
-        driveLF.setDirection(DcMotor.Direction.FORWARD);
+        driveLF.setDirection(DcMotor.Direction.REVERSE);
         driveLB.setDirection(DcMotor.Direction.REVERSE);
-        driveRF.setDirection(DcMotor.Direction.REVERSE);
+        driveRF.setDirection(DcMotor.Direction.FORWARD);
         driveRB.setDirection(DcMotor.Direction.FORWARD);
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");
@@ -102,7 +102,7 @@ public class Teleop extends OpMode
         double rotatedX = driveX * Math.cos(botHeading) - driveY * Math.sin(botHeading);
         double rotatedY = driveX * Math.sin(botHeading) + driveY * Math.cos(botHeading);
 
-        double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1) * 2;
+        double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1)*2;
         powerLF = (rotatedY + rotatedX + driveTurn) / denominator;
         powerLB = (rotatedY - rotatedX + driveTurn) / denominator;
         powerRF = (rotatedY - rotatedX - driveTurn) / denominator;
