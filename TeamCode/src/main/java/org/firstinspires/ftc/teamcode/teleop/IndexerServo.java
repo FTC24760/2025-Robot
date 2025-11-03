@@ -19,8 +19,6 @@ public class IndexerServo extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private Servo servo1, servo2, servo3;
 
-    private DcMotor rightDrive = null;
-
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
