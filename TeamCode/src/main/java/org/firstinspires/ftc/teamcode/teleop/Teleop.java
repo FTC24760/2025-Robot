@@ -42,14 +42,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Teleop extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor driveLF = null;
-    private DcMotor driveLB = null;
-    private DcMotor driveRF = null;
-    private DcMotor driveRB = null;
+    private DcMotor driveLF, driveLB, driveRF, driveRB;
     IMU imu;
-    double positionLF, positionLB, positionRF, positionRB;
-    double previousPositionLF, previousPositionLB, previousPositionRF, previousPositionRB;
-    double poseX, poseY;
+
     @Override
     public void init() {
         driveLF = hardwareMap.get(DcMotor.class, "drive_lf");
@@ -78,60 +73,38 @@ public class Teleop extends OpMode
     @Override
     public void start() {
         runtime.reset();
-        poseX = 0;
-        poseY = 0;
     }
 
     @Override
     public void loop() {
         double powerLF, powerLB, powerRF, powerRB;
-        positionLF = driveLF.getCurrentPosition();
-        positionLB = driveLB.getCurrentPosition();
-        positionRF = driveRF.getCurrentPosition();
-        positionRB = driveRB.getCurrentPosition();
-
         if (gamepad1.left_bumper) {
             imu.resetYaw();
         }
-        double botHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
+        // drive
+        double botHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double driveY    = -gamepad1.left_stick_y;
         double driveX    = gamepad1.left_stick_x;
         double driveTurn = gamepad1.right_stick_x;
-
         double rotatedX = driveX * Math.cos(botHeading) - driveY * Math.sin(botHeading);
         double rotatedY = driveX * Math.sin(botHeading) + driveY * Math.cos(botHeading);
-
         double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1)*2;
         powerLF = (rotatedY + rotatedX + driveTurn) / denominator;
         powerLB = (rotatedY - rotatedX + driveTurn) / denominator;
         powerRF = (rotatedY - rotatedX - driveTurn) / denominator;
         powerRB = (rotatedY + rotatedX - driveTurn) / denominator;
-
         driveLF.setPower(powerLF);
         driveLB.setPower(powerLB);
         driveRF.setPower(powerRF);
         driveRB.setPower(powerRB);
-        double deltaPositionLF = previousPositionLF - positionLF;
-        double deltaPositionLB = previousPositionLB - positionLB;
-        double deltaPositionRF = previousPositionRF - positionRF;
-        double deltaPositionRB = previousPositionRB - positionRB;
 
-        double relativeDeltaPositionY = -deltaPositionRF - deltaPositionRB - deltaPositionLF - deltaPositionLB;
-        double relativeDeltaPositionX = deltaPositionRF - deltaPositionRB - deltaPositionLF + deltaPositionLB;
-        poseX += relativeDeltaPositionX * Math.cos(botHeading) - relativeDeltaPositionY * Math.sin(botHeading);
-        poseY += relativeDeltaPositionX * Math.sin(botHeading) + relativeDeltaPositionY * Math.cos(botHeading);
-        
+
         
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
         telemetry.addData("Heading", botHeading / 3.14159 * 180);
-        telemetry.addData("Pose", "x: (%.2f) y: (%.2f)", poseX, poseY);
-        previousPositionLF = positionLF;
-        previousPositionLB = positionLB;
-        previousPositionRF = positionRF;
-        previousPositionRB = positionRB;
     }
     
     @Override
