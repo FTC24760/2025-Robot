@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -43,8 +44,9 @@ public class Teleop extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor driveLF, driveLB, driveRF, driveRB;
+    private Servo revolverPosition;
     IMU imu;
-
+    double revolverState;
     @Override
     public void init() {
         driveLF = hardwareMap.get(DcMotor.class, "drive_lf");
@@ -99,8 +101,33 @@ public class Teleop extends OpMode
         driveRF.setPower(powerRF);
         driveRB.setPower(powerRB);
 
+        // in/out
+        double outtakePosition[]= {0, 0, 0};
+        double intakePosition[] = {0, 0, 0};
+        char clawBallColor[] = {'N', 'N', 'N'};
+        if (mode == "in") {
+            int openClaw = -1;
+            if (gamepad2.dpad_left) {
+                for (int i = 0; i < 3; i++) {
+                    if (clawBallColor[i] == 'N') {
+                        openClaw = i;
+                        break;
+                    }
+                }
+                revolverState = openClaw;
+            }
+            if (gamepad2.dpad_down) {
+                if (clawBallColor[openClaw] == 'N')
+                    clawBallColor[openClaw] = intakeColor;
+                else
+                    clawBallColor[openClaw] = 'N';
 
-        
+            }
+        }
+        else {
+
+        }
+        revolverPosition.setPosition(intakePosition[openClaw]);
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
