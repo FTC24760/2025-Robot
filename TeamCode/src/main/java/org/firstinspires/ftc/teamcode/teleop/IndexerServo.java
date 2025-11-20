@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 
-@TeleOp(name="servo teste", group="Teleop")
+@TeleOp(name="Revolver/Indexer Servo Testing", group="Teleop")
 public class IndexerServo extends LinearOpMode {
 
     // Declare OpMode members.
