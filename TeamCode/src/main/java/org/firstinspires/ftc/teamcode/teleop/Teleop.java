@@ -42,11 +42,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @TeleOp(name="Drive", group="Teleop")
 public class Teleop extends OpMode
 {
+    String mode = "in";
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor driveLF, driveLB, driveRF, driveRB;
-    private Servo revolverPosition;
+    private Servo revolver;
+    char clawBallColor[] = {'N', 'N', 'N'};
     IMU imu;
-    double revolverState;
+    int revolverPosition;
     @Override
     public void init() {
         driveLF = hardwareMap.get(DcMotor.class, "drive_lf");
@@ -102,32 +104,30 @@ public class Teleop extends OpMode
         driveRB.setPower(powerRB);
 
         // in/out
+        char intakeColor = 'e';
+        
         double outtakePosition[]= {0, 0, 0};
         double intakePosition[] = {0, 0, 0};
-        char clawBallColor[] = {'N', 'N', 'N'};
+        if (gamepad2.right_bumper) mode = "out";
+        if (gamepad2.left_bumper) mode = "in";
+        if (gamepad2.dpad_up) revolverPosition = 0;
+        if (gamepad2.dpad_left) revolverPosition = 1;
+        if (gamepad2.dpad_down) revolverPosition = 2;
         if (mode == "in") {
-            int openClaw = -1;
-            if (gamepad2.dpad_left) {
-                for (int i = 0; i < 3; i++) {
-                    if (clawBallColor[i] == 'N') {
-                        openClaw = i;
-                        break;
-                    }
-                }
-                revolverState = openClaw;
-            }
-            if (gamepad2.dpad_down) {
-                if (clawBallColor[openClaw] == 'N')
-                    clawBallColor[openClaw] = intakeColor;
+            if (gamepad2.a) {
+                if (clawBallColor[revolverPosition] == 'N')
+                    clawBallColor[revolverPosition] = intakeColor;
                 else
-                    clawBallColor[openClaw] = 'N';
-
+                    clawBallColor[revolverPosition] = 'N';
             }
+            revolver.setPosition(intakePosition[revolverPosition]);
         }
         else {
+            if (gamepad2.a) {
 
+            }
+            revolver.setPosition(outtakePosition[revolverPosition]);
         }
-        revolverPosition.setPosition(intakePosition[openClaw]);
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
