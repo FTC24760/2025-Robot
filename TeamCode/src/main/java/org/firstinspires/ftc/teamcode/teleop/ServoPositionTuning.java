@@ -16,6 +16,18 @@ import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCapt
 public class ServoPositionTuning extends LinearOpMode {
 
     // Declare OpMode members.
+
+    /*
+    POSITIONS:
+    slot 1 score - 0.075
+slot 2 score - 0.805
+slot 3 score - 0.45
+
+slot 1 intake - 0.62
+slot 2 intake - 0.245
+slot 3 intake - 1
+
+     */
     private ElapsedTime runtime = new ElapsedTime();
     private Servo servo;
     private Servo led1;
@@ -50,11 +62,11 @@ public class ServoPositionTuning extends LinearOpMode {
             // accept commands
             if (gamepad1.a) {
                 if (servoPosition > 0) {
-                    servoPosition -= 0.005;
+                    servoPosition -= 0.002;
                 }
             } else if (gamepad1.x) {
                 if (servoPosition < 1) {
-                    servoPosition += 0.005;
+                    servoPosition += 0.002;
                 }
             }
 
