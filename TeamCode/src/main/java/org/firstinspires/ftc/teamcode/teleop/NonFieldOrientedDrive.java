@@ -11,15 +11,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name="Field Oriented Drive")
-public class FieldOrientedDrive extends OpMode
+@TeleOp(name="Regular Drive")
+public class NonFieldOrientedDrive extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    IMU imu;
 
     @Override
     public void init() {
@@ -35,11 +34,6 @@ public class FieldOrientedDrive extends OpMode
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
-        imu.initialize(parameters);
 
         telemetry.addData("Status", "Initialized");
     }
@@ -60,23 +54,16 @@ public class FieldOrientedDrive extends OpMode
         double rightFrontPower;
         double rightBackPower;
 
-        if (gamepad1.start) { // change this to a button
-            imu.resetYaw();
-        }
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double driveY    = gamepad1.left_stick_y;
-        double driveX    = gamepad1.left_stick_x;
-        double driveTurn = gamepad1.right_stick_x;
+        double y    = -gamepad1.left_stick_y;
+        double x    = gamepad1.left_stick_x * 1.1;
+        double rx = gamepad1.right_stick_x;
 
-        double rotatedX = driveX * Math.cos(botHeading) - driveY * Math.sin(botHeading);
-        double rotatedY = driveX * Math.sin(botHeading) + driveY * Math.cos(botHeading);
-
-        double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(driveTurn), 1);
-        leftFrontPower  = (rotatedY  + rotatedX + driveTurn) / denominator;
-        leftBackPower   = (rotatedY  - rotatedX + driveTurn) / denominator;
-        rightFrontPower = (-rotatedY - rotatedX - driveTurn) / denominator;
-        rightBackPower  = (-rotatedY + rotatedX - driveTurn) / denominator;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        leftFrontPower = (y + x + rx) / denominator;
+        leftBackPower = (y - x + rx) / denominator;
+        rightFrontPower = (y - x - rx) / denominator;
+        rightBackPower = (y + x - rx) / denominator;
 
         leftFrontDrive.setPower(leftFrontPower);
         leftBackDrive.setPower(leftBackPower);

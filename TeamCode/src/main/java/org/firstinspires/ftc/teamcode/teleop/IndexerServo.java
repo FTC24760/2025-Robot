@@ -27,9 +27,9 @@ public class IndexerServo extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        servo1 = hardwareMap.get(Servo.class, "1");
-        servo2 = hardwareMap.get(Servo.class, "2");
-        servo3 = hardwareMap.get(Servo.class, "3");
+        servo1 = hardwareMap.get(Servo.class, "slot1");
+        servo2 = hardwareMap.get(Servo.class, "slot2");
+        servo3 = hardwareMap.get(Servo.class, "slot3");
         int indexerPos = 0;
         Servo servos[] = {servo1, servo2, servo3};
         double servoPos[] = {0, 0, 0};

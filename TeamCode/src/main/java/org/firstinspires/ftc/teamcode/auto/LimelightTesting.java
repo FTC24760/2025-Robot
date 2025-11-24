@@ -24,7 +24,6 @@ public class LimelightTesting extends LinearOpMode {
     {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         limelight.start();
 

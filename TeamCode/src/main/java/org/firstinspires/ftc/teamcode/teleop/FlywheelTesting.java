@@ -21,8 +21,8 @@ public class FlywheelTesting extends OpMode
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "flywheelLeft");
-        flywheelRight = hardwareMap.get(DcMotor.class, "flywheelRight");
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "leftShooter");
+        flywheelRight = hardwareMap.get(DcMotor.class, "rightShooter");
 
         flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
 

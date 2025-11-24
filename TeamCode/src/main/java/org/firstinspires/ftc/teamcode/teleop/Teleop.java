@@ -51,10 +51,10 @@ public class Teleop extends OpMode
     int revolverPosition;
     @Override
     public void init() {
-        driveLF = hardwareMap.get(DcMotor.class, "drive_lf");
-        driveLB = hardwareMap.get(DcMotor.class, "drive_lb");
-        driveRF = hardwareMap.get(DcMotor.class, "drive_rf");
-        driveRB = hardwareMap.get(DcMotor.class, "drive_rb");
+        driveLF = hardwareMap.get(DcMotor.class, "flDrive");
+        driveLB = hardwareMap.get(DcMotor.class, "rlDrive");
+        driveRF = hardwareMap.get(DcMotor.class, "frDrive");
+        driveRB = hardwareMap.get(DcMotor.class, "rrDrive");
         driveLF.setDirection(DcMotor.Direction.REVERSE);
         driveLB.setDirection(DcMotor.Direction.REVERSE);
         driveRF.setDirection(DcMotor.Direction.FORWARD);

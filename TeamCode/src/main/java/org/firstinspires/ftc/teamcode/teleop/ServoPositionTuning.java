@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.camera.delegating.DelegatingCaptureSequence;
 
-@TeleOp(name="Servo Position Tuning", group="Teleop")
+@TeleOp(name="Revolver Servo Position Tuning", group="Teleop")
 public class ServoPositionTuning extends LinearOpMode {
 
     // Declare OpMode members.
@@ -42,7 +42,7 @@ slot 3 intake - 1
         waitForStart();
         runtime.reset();
 
-        servo = hardwareMap.get(Servo.class, "revolverServo");
+        servo = hardwareMap.get(Servo.class, "revolver");
         led1 = hardwareMap.get(Servo.class, "led1");
         led2 = hardwareMap.get(Servo.class, "led2");
         led3 = hardwareMap.get(Servo.class, "led3");
