@@ -25,6 +25,7 @@ public class DualCameraTeleOp extends LinearOpMode {
     private DcMotor flywheelL, flywheelR;
     private Servo revolverServo;
     private Servo claw1, claw2, claw3;
+    private Servo kicker; // <--- ADDED KICKER
     private IMU imu;
 
     // CAMERAS
@@ -32,11 +33,14 @@ public class DualCameraTeleOp extends LinearOpMode {
     private HuskyLens huskyLens;     // BACK:  Score Alignment
 
     // --- CONSTANTS ---
-    // Update these specific values with your servo programmer!
     private final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
     private final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
-    private final double CLAW_OPEN = 0.3;
-    private final double CLAW_CLOSE = 0.6;
+    private final double CLAW_OPEN = 0.0;
+    private final double CLAW_CLOSE = 0.17;
+
+    // KICKER CONSTANTS (TUNE THESE VALUES)
+    private final double KICKER_REST = 0.8;
+    private final double KICKER_FIRE = 0.58;
 
     // --- STATE MACHINE ---
     private enum RobotState {
@@ -47,15 +51,12 @@ public class DualCameraTeleOp extends LinearOpMode {
     private RobotState currentState = RobotState.DRIVER_CONTROL;
 
     // --- GAME LOGIC ---
-    // The Motif: The pattern we MUST score in.
     private List<String> motif = new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"));
     private int motifIndex = 0;
 
-    // Slots management
     private List<IntakeSlot> slots = new ArrayList<>();
     private int targetSlotIndex = -1;
 
-    // Driving direction multiplier (1 for Forward, -1 for Backward)
     private double driveDirection = 1.0;
 
     @Override
@@ -70,7 +71,6 @@ public class DualCameraTeleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
             // 1. INPUTS
-            // Standard Field Centric Inputs
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double rx = gamepad1.right_stick_x;
@@ -78,30 +78,31 @@ public class DualCameraTeleOp extends LinearOpMode {
             // 2. STATE HANDLING
             switch (currentState) {
                 case DRIVER_CONTROL:
-                    // Standard Drive
                     driveFieldCentric(y, x, rx);
 
-                    // Button: INTAKE (Right Bumper)
                     if (gamepad1.right_bumper) {
                         targetSlotIndex = getNextEmptySlot();
                         if (targetSlotIndex != -1) {
-                            driveDirection = 1.0; // Drive Forward
+                            driveDirection = 1.0;
                             currentState = RobotState.AUTO_ALIGN_INTAKE;
                         }
                     }
 
-                    // Button: SCORE (Left Bumper)
                     if (gamepad1.left_bumper) {
-                        // Find the slot that matches the current Motif color
                         String requiredColor = motif.get(motifIndex);
                         targetSlotIndex = getSlotWithColor(requiredColor);
 
                         if (targetSlotIndex != -1) {
-                            driveDirection = -1.0; // Drive Backward (Camera is on back)
+                            driveDirection = -1.0;
                             currentState = RobotState.AUTO_ALIGN_SCORE;
                         } else {
+                            // TODO make it still ok for it to score
                             telemetry.addData("Alert", "No " + requiredColor + " found!");
                         }
+                    }
+
+                    if (gamepad1.right_trigger > 0.3) {
+                        imu.resetYaw();
                     }
                     break;
 
@@ -129,45 +130,33 @@ public class DualCameraTeleOp extends LinearOpMode {
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
     private void runIntakeLogic() {
-        // 1. Servo to Position
         revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
         slots.get(targetSlotIndex).isClawOpen = true;
 
-        // 2. Limelight Tracking (TensorFlow / Neural Detector)
         LLResult result = limelight.getLatestResult();
         double turnPower = 0;
         String detectedLabel = "Unknown";
 
         if (result != null && result.isValid()) {
-            // Get the list of detections (e.g., "Purple", "Green")
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
-
             if (!detections.isEmpty()) {
-                // Track the largest object
                 LLResultTypes.DetectorResult largest = detections.get(0);
-                detectedLabel = largest.getClassName(); // Requires correct pipeline setup!
-
-                // PID Turn
+                detectedLabel = largest.getClassName();
                 double tx = largest.getTargetXDegrees();
-                turnPower = -tx * 0.03;
+                turnPower = tx * 0.015;
             }
         }
 
-        // 3. Drive (Driver controls movement, Robot controls Turn)
         driveRobot(gamepad1.left_stick_y, gamepad1.left_stick_x, turnPower);
 
-        // 4. Confirm Intake (Press A)
         if (gamepad1.a) {
             slots.get(targetSlotIndex).occupied = true;
-
-            // Save the detected color (or default to Purple if detection fails)
             if (detectedLabel.toLowerCase().contains("green")) {
                 slots.get(targetSlotIndex).color = "Green";
             } else {
                 slots.get(targetSlotIndex).color = "Purple";
             }
-
-            slots.get(targetSlotIndex).isClawOpen = false; // Close
+            slots.get(targetSlotIndex).isClawOpen = false;
             currentState = RobotState.DRIVER_CONTROL;
         }
 
@@ -181,36 +170,41 @@ public class DualCameraTeleOp extends LinearOpMode {
         // 1. Servo to Position
         revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
 
-        // 2. Spin Flywheels
-        flywheelL.setPower(1.0);
-        flywheelR.setPower(1.0);
+        // 2. Spin Flywheels (These run continuously in this state)
+        flywheelL.setPower(-1.0);
+        flywheelR.setPower(-1.0);
 
-        // 3. HuskyLens Tracking (AprilTag or Color)
+        // 3. HuskyLens Tracking
         HuskyLens.Block[] blocks = huskyLens.blocks();
         double turnPower = 0;
 
         if (blocks.length > 0) {
-            // HuskyLens resolution is 320x240. Center is 160.
-            // If block is at 100 (left of screen), robot (back) needs to turn Left.
-            // Since camera faces BACK, a Left turn for the Camera is a Left turn for the Robot.
-
-            int targetX = blocks[0].x; // X coordinate of the target
-            double error = 160 - targetX; // Positive if target is to the Left
-
-            // Simple P-Controller
+            int targetX = blocks[0].x;
+            double error = 160 - targetX;
             turnPower = error * 0.005;
         }
 
-        // 4. Drive Logic (Inverted because we are driving backwards)
-        // We flip the stick inputs so "Up" on stick moves the robot "Backwards" (towards scoring)
+        // 4. Drive Logic
         driveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, turnPower);
 
-        // 5. Shoot (Press A)
+        // 5. Shoot Sequence (Press A)
         if (gamepad1.a) {
+            // Open claw to release hold on pixel
             slots.get(targetSlotIndex).isClawOpen = true;
-            sleep(250); // Small wait for release
+            updateRevolverServos(); // Force update immediately
 
-            // Reset Slot
+            // --- KICKER SEQUENCE START ---
+            // Kick into the spinning flywheels
+            sleep(800);
+            kicker.setPosition(KICKER_FIRE);
+            sleep(300); // Wait for servo to extend and hit the ball
+
+            // Retract Kicker
+            kicker.setPosition(KICKER_REST);
+            sleep(1200); // Wait for retraction
+            // --- KICKER SEQUENCE END ---
+
+            // Reset Slot Logic
             slots.get(targetSlotIndex).occupied = false;
             slots.get(targetSlotIndex).color = "None";
 
@@ -220,7 +214,7 @@ public class DualCameraTeleOp extends LinearOpMode {
             // Cleanup
             flywheelL.setPower(0);
             flywheelR.setPower(0);
-            driveDirection = 1.0; // Reset to forward driving
+            driveDirection = 1.0;
             currentState = RobotState.DRIVER_CONTROL;
         }
 
@@ -261,7 +255,6 @@ public class DualCameraTeleOp extends LinearOpMode {
         slots.add(new IntakeSlot(2, claw2));
         slots.add(new IntakeSlot(3, claw3));
 
-        // PRELOAD: Green (1), Purple (2), Purple (3)
         slots.get(0).occupied = true; slots.get(0).color = "Green";
         slots.get(1).occupied = true; slots.get(1).color = "Purple";
         slots.get(2).occupied = true; slots.get(2).color = "Purple";
@@ -293,19 +286,11 @@ public class DualCameraTeleOp extends LinearOpMode {
 
     private void driveFieldCentric(double y, double x, double rx) {
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        // Rotate control vector by -heading
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
         rotX = rotX * 1.1;
 
-        // Apply Drive Direction (flips controls if we are backing up to score)
-        // Note: In field centric, "Forward" is always "Away from driver".
-        // We usually don't flip field centric controls, but we flip Robot Centric.
-        // If you want the robot to feel like the "Back" is now the "Front":
         if (driveDirection < 0) {
-            // Optional: Rotate the coordinate system 180 degrees
             rotX = -rotX;
             rotY = -rotY;
         }
@@ -317,7 +302,6 @@ public class DualCameraTeleOp extends LinearOpMode {
         rb.setPower((rotY + rotX - rx) / denominator);
     }
 
-    // Robot Centric Drive for Auto-Alignment
     private void driveRobot(double y, double x, double rx) {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         lf.setPower((y + x + rx) / denominator);
@@ -341,10 +325,17 @@ public class DualCameraTeleOp extends LinearOpMode {
         flywheelR = hardwareMap.get(DcMotor.class, "rightShooter");
         flywheelR.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        flywheelL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         revolverServo = hardwareMap.get(Servo.class, "revolver");
         claw1 = hardwareMap.get(Servo.class, "slot1");
         claw2 = hardwareMap.get(Servo.class, "slot2");
         claw3 = hardwareMap.get(Servo.class, "slot3");
+
+        // --- KICKER INIT ---
+        kicker = hardwareMap.get(Servo.class, "kicker");
+        kicker.setPosition(KICKER_REST);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -352,13 +343,11 @@ public class DualCameraTeleOp extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(parameters);
 
-        // LIMELIGHT INIT
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0); // Ensure this pipeline has your Neural Detector
+        limelight.pipelineSwitch(0);
         limelight.start();
 
-        // HUSKYLENS INIT
         huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION); // Or COLOR_RECOGNITION
+        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
     }
 }
