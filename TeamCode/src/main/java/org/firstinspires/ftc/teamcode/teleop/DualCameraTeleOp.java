@@ -7,6 +7,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo; // <--- IMPORT ADDED
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@TeleOp(name="Dual-Camera Motif TeleOp", group="Competition")
+@TeleOp(name="Dual-Camera Motif TeleOp v2", group="Competition")
 public class DualCameraTeleOp extends LinearOpMode {
 
     // --- HARDWARE ---
@@ -25,7 +26,8 @@ public class DualCameraTeleOp extends LinearOpMode {
     private DcMotor flywheelL, flywheelR;
     private Servo revolverServo;
     private Servo claw1, claw2, claw3;
-    private Servo kicker; // <--- ADDED KICKER
+    private Servo kicker;
+    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
     private IMU imu;
 
     // CAMERAS
@@ -38,9 +40,18 @@ public class DualCameraTeleOp extends LinearOpMode {
     private final double CLAW_OPEN = 0.0;
     private final double CLAW_CLOSE = 0.17;
 
-    // KICKER CONSTANTS (TUNE THESE VALUES)
-    private final double KICKER_REST = 0.8;
-    private final double KICKER_FIRE = 0.58;
+    private final double KICKER_REST = 0.75;
+    private final double KICKER_FIRE = 0.54;
+
+    private final double SCORING_POWER = -0.67;
+
+    // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
+    // Adjust DESIRED_TY based on how close you want to be to the ball.
+    // If the camera is angled down, -20.0 is usually very close, 0.0 is far.
+    private final double DESIRED_TY = -18.0;
+    private final double DRIVE_GAIN = 0.03;  // Speed multiplier for distance
+    private final double TURN_GAIN  = 0.02;  // Speed multiplier for turning
+    private final double MAX_AUTO_SPEED = 0.5; // Safety cap
 
     // --- STATE MACHINE ---
     private enum RobotState {
@@ -78,6 +89,9 @@ public class DualCameraTeleOp extends LinearOpMode {
             // 2. STATE HANDLING
             switch (currentState) {
                 case DRIVER_CONTROL:
+                    // Ensure intake is off during normal driving
+                    intakeSpinner.setPower(0.0);
+
                     driveFieldCentric(y, x, rx);
 
                     if (gamepad1.right_bumper) {
@@ -96,7 +110,6 @@ public class DualCameraTeleOp extends LinearOpMode {
                             driveDirection = -1.0;
                             currentState = RobotState.AUTO_ALIGN_SCORE;
                         } else {
-                            // TODO make it still ok for it to score
                             telemetry.addData("Alert", "No " + requiredColor + " found!");
                         }
                     }
@@ -130,11 +143,16 @@ public class DualCameraTeleOp extends LinearOpMode {
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
     private void runIntakeLogic() {
+        // 1. Spin Intake Active
+        intakeSpinner.setPower(1.0); // <--- NEW: Spins 'in'
+
+        // 2. Servo Setup
         revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
         slots.get(targetSlotIndex).isClawOpen = true;
 
         LLResult result = limelight.getLatestResult();
         double turnPower = 0;
+        double drivePower = 0; // <--- NEW: Forward/Back Power
         String detectedLabel = "Unknown";
 
         if (result != null && result.isValid()) {
@@ -142,39 +160,59 @@ public class DualCameraTeleOp extends LinearOpMode {
             if (!detections.isEmpty()) {
                 LLResultTypes.DetectorResult largest = detections.get(0);
                 detectedLabel = largest.getClassName();
+
                 double tx = largest.getTargetXDegrees();
-                turnPower = tx * 0.015;
+                double ty = largest.getTargetYDegrees(); // <--- NEW: Vertical Angle
+
+                // Turn Logic
+                turnPower = tx * TURN_GAIN;
+
+                // Drive Logic (Move forward until ty reaches DESIRED_TY)
+                // Usually: Far away = ty is 0 or slightly negative. Close = ty is very negative (e.g., -20).
+                // Equation: (Current - Target) * Gain
+                // Example: Current -5, Target -20. (-5 - -20) = +15. Positive power drives forward.
+                drivePower = (ty - DESIRED_TY) * DRIVE_GAIN;
+
+                // Safety Clamp
+                if (drivePower > MAX_AUTO_SPEED) drivePower = MAX_AUTO_SPEED;
+                if (drivePower < -MAX_AUTO_SPEED) drivePower = -MAX_AUTO_SPEED;
             }
         }
 
-        driveRobot(gamepad1.left_stick_y, gamepad1.left_stick_x, turnPower);
+        // 3. Drive Robot (Auto Y, Manual X, Auto Turn)
+        // We override the 'y' stick with our calculated drivePower
+        driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
 
+        // 4. Capture/Exit Logic
         if (gamepad1.a) {
             slots.get(targetSlotIndex).occupied = true;
+            // Simple color logic based on label
             if (detectedLabel.toLowerCase().contains("green")) {
                 slots.get(targetSlotIndex).color = "Green";
             } else {
                 slots.get(targetSlotIndex).color = "Purple";
             }
+
             slots.get(targetSlotIndex).isClawOpen = false;
+            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
             currentState = RobotState.DRIVER_CONTROL;
         }
 
-        if (gamepad1.b) currentState = RobotState.DRIVER_CONTROL;
+        if (gamepad1.b) {
+            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
+            currentState = RobotState.DRIVER_CONTROL;
+        }
     }
 
     // ==========================================================================
     //                         SCORE LOGIC (HuskyLens - Back)
     // ==========================================================================
     private void runScoreLogic() {
-        // 1. Servo to Position
         revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
 
-        // 2. Spin Flywheels (These run continuously in this state)
-        flywheelL.setPower(-1.0);
-        flywheelR.setPower(-1.0);
+        flywheelL.setPower(SCORING_POWER);
+        flywheelR.setPower(SCORING_POWER);
 
-        // 3. HuskyLens Tracking
         HuskyLens.Block[] blocks = huskyLens.blocks();
         double turnPower = 0;
 
@@ -184,34 +222,24 @@ public class DualCameraTeleOp extends LinearOpMode {
             turnPower = error * 0.005;
         }
 
-        // 4. Drive Logic
         driveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, turnPower);
 
-        // 5. Shoot Sequence (Press A)
         if (gamepad1.a) {
-            // Open claw to release hold on pixel
             slots.get(targetSlotIndex).isClawOpen = true;
-            updateRevolverServos(); // Force update immediately
+            updateRevolverServos();
 
-            // --- KICKER SEQUENCE START ---
-            // Kick into the spinning flywheels
             sleep(800);
             kicker.setPosition(KICKER_FIRE);
-            sleep(300); // Wait for servo to extend and hit the ball
+            sleep(300);
 
-            // Retract Kicker
             kicker.setPosition(KICKER_REST);
-            sleep(1200); // Wait for retraction
-            // --- KICKER SEQUENCE END ---
+            sleep(1200);
 
-            // Reset Slot Logic
             slots.get(targetSlotIndex).occupied = false;
             slots.get(targetSlotIndex).color = "None";
 
-            // Next Motif
             motifIndex = (motifIndex + 1) % motif.size();
 
-            // Cleanup
             flywheelL.setPower(0);
             flywheelR.setPower(0);
             driveDirection = 1.0;
@@ -333,9 +361,12 @@ public class DualCameraTeleOp extends LinearOpMode {
         claw2 = hardwareMap.get(Servo.class, "slot2");
         claw3 = hardwareMap.get(Servo.class, "slot3");
 
-        // --- KICKER INIT ---
         kicker = hardwareMap.get(Servo.class, "kicker");
         kicker.setPosition(KICKER_REST);
+
+        // --- INTAKE SPINNER ---
+        intakeSpinner = hardwareMap.get(CRServo.class, "intake");
+        intakeSpinner.setPower(0); // Ensure off at start
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(

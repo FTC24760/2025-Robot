@@ -5,6 +5,7 @@ import static java.lang.Math.floor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,6 +34,7 @@ slot 3 intake - 1
     private Servo led1;
     private Servo led2;
     private Servo led3;
+    private CRServo intake;
 
     @Override
     public void runOpMode() {
@@ -46,6 +48,7 @@ slot 3 intake - 1
         led1 = hardwareMap.get(Servo.class, "led1");
         led2 = hardwareMap.get(Servo.class, "led2");
         led3 = hardwareMap.get(Servo.class, "led3");
+        intake = hardwareMap.get(CRServo.class, "intake");
 
         led1.setPosition(0.5);
         led2.setPosition(0.5);
@@ -69,6 +72,8 @@ slot 3 intake - 1
                     servoPosition += 0.002;
                 }
             }
+
+            intake.setPower(1.0);
 
             telemetry.addData("Servo position real", servo.getPosition());
             telemetry.addData("Servo position button", servoPosition);
