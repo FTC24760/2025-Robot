@@ -46,6 +46,8 @@ public class Teleop extends OpMode
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor driveLF, driveLB, driveRF, driveRB;
     private Servo revolver;
+    private Servo indicatorLight1, indicatorLight2, indicatorLight3;
+    private Servo indicatorLights[] = {indicatorLight1, indicatorLight2, indicatorLight3};
     char clawBallColor[] = {'N', 'N', 'N'};
     IMU imu;
     int revolverPosition;
@@ -128,12 +130,16 @@ public class Teleop extends OpMode
             }
             revolver.setPosition(outtakePosition[revolverPosition]);
         }
+        for (int i = 0; i < 3; i++) {
+            if (clawBallColor[i] == 'G') indicatorLights[i].setPosition(0);
+
+        }
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left front (%.2f) back (%.2f), right front (%.2f) back (%.2f)",
                 powerLF, powerLB, powerRF, powerRB);
         telemetry.addData("Heading", botHeading / 3.14159 * 180);
     }
-    
+
     @Override
     public void stop() {
     }

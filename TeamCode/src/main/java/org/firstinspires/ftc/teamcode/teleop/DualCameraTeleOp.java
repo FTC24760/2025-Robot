@@ -238,7 +238,8 @@ public class DualCameraTeleOp extends LinearOpMode {
             slots.get(targetSlotIndex).occupied = false;
             slots.get(targetSlotIndex).color = "None";
 
-            motifIndex = (motifIndex + 1) % motif.size();
+            motifIndex++;
+            motifIndex = motifIndex % motif.size();
 
             flywheelL.setPower(0);
             flywheelR.setPower(0);
