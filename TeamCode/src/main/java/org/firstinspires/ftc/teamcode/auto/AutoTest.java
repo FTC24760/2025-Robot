@@ -23,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleop.DualCameraTeleOp;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,7 +94,7 @@ public class AutoTest extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case TO_LAUNCH_ZONE:
-                follower.followPath(initialScoring);
+                //follower.followPath(initialScoring);
                 if (!follower.isBusy())
                     setPathState(RobotState.SCORING);
                 break;
@@ -224,12 +225,12 @@ public class AutoTest extends OpMode {
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
 
-            sleep(800);
+            //sleep(800);
             kicker.setPosition(KICKER_FIRE);
-            sleep(300);
+            //sleep(300);
 
             kicker.setPosition(KICKER_REST);
-            sleep(1200);
+            //sleep(1200);
 
             slots.get(targetSlotIndex).occupied = false;
             slots.get(targetSlotIndex).color = "None";

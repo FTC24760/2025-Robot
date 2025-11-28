@@ -37,11 +37,11 @@ public class DualCameraTeleOp extends LinearOpMode {
     // --- CONSTANTS ---
     private final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
     private final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
-    private final double CLAW_OPEN = 0.0;
+    private final double CLAW_OPEN = 0.03;
     private final double CLAW_CLOSE = 0.17;
 
     private final double KICKER_REST = 0.75;
-    private final double KICKER_FIRE = 0.54;
+    private final double KICKER_FIRE = 0.45;
 
     private final double SCORING_POWER = -1.0;
 
