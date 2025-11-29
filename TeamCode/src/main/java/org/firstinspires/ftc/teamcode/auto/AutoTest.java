@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.auto; // make sure this aligns with class location
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
@@ -22,7 +24,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleop.DualCameraTeleOp;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,61 +89,15 @@ public class AutoTest extends OpMode {
     private Pose currentPose;
     private Path toLaunchZone;
     public void buildPaths() {
-
+    }
+    public Pose getRobotPoseFromCamera() {
+        //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
+        //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
+        //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
+        return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
 
-    public void autonomousPathUpdate() {
-        switch (pathState) {
-            case TO_LAUNCH_ZONE:
-                //follower.followPath(initialScoring);
-                if (!follower.isBusy())
-                    setPathState(RobotState.SCORING);
-                break;
 
-            case INTAKE:
-                runIntakeLogic();
-                if (false) {
-                    //currentPose =
-                    setPathState(RobotState.TO_LAUNCH_ZONE);
-                    toLaunchZone = new Path(new BezierLine(startPose, scorePose));
-                    toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-                }
-                break;
-
-            case SCORING:
-                runScoreLogic();
-                if (false) {
-                    setPathState(RobotState.INTAKE);
-                }
-                break;
-
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
-
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                //if (!follower.isBusy()) {
-                    /* Score Preload */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                   // follower.followPath(grabPickup1, true);
-                   // setPathState(2);
-              //  }
-           //     break;
-           // case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-              //  if (!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-              //      follower.followPath(scorePickup1, true);
-              //      setPathState(3);
-             //   }
-            //    break;
-        }
-    }
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
@@ -185,7 +140,7 @@ public class AutoTest extends OpMode {
 
         // 3. Drive Robot (Auto Y, Manual X, Auto Turn)
         // We override the 'y' stick with our calculated drivePower
-        driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
+        //driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
 
         // 4. Capture/Exit Logic
         if (gamepad1.a) {
@@ -225,12 +180,12 @@ public class AutoTest extends OpMode {
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
 
-            //sleep(800);
+            sleep(800);
             kicker.setPosition(KICKER_FIRE);
-            //sleep(300);
+            sleep(300);
 
             kicker.setPosition(KICKER_REST);
-            //sleep(1200);
+            sleep(1200);
 
             slots.get(targetSlotIndex).occupied = false;
             slots.get(targetSlotIndex).color = "None";
@@ -310,31 +265,6 @@ public class AutoTest extends OpMode {
     //                             DRIVETRAIN
     // ==========================================================================
 
-    private void driveFieldCentric(double y, double x, double rx) {
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-        rotX = rotX * 1.1;
-
-        if (driveDirection < 0) {
-            rotX = -rotX;
-            rotY = -rotY;
-        }
-
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        lf.setPower((rotY + rotX + rx) / denominator);
-        lb.setPower((rotY - rotX + rx) / denominator);
-        rf.setPower((rotY - rotX - rx) / denominator);
-        rb.setPower((rotY + rotX - rx) / denominator);
-    }
-
-    private void driveRobot(double y, double x, double rx) {
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        lf.setPower((y + x + rx) / denominator);
-        lb.setPower((y - x + rx) / denominator);
-        rf.setPower((y - x - rx) / denominator);
-        rb.setPower((y + x - rx) / denominator);
-    }
 
     private void initHardware() {
         lf = hardwareMap.get(DcMotor.class, "flDrive");
@@ -388,12 +318,6 @@ public class AutoTest extends OpMode {
     }
 
     @Override
-    public void start() {
-        opmodeTimer.resetTimer();
-        setPathState(RobotState.TO_LAUNCH_ZONE);
-    }
-
-    @Override
     public void init() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
@@ -402,17 +326,70 @@ public class AutoTest extends OpMode {
         initHardware();
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(new Pose());
 
     }
-
+    @Override
+    public void start() {
+        opmodeTimer.resetTimer();
+        setPathState(RobotState.TO_LAUNCH_ZONE);
+    }
     @Override
     public void loop() {
 
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
-        autonomousPathUpdate();
+        switch (pathState) {
+            case TO_LAUNCH_ZONE:
+                follower.followPath(toLaunchZone);
+                if (!follower.isBusy())
+                    setPathState(RobotState.SCORING);
+                break;
 
+            case INTAKE:
+                runIntakeLogic();
+                if (false) {
+                    //currentPose =
+                    setPathState(RobotState.TO_LAUNCH_ZONE);
+                    toLaunchZone = new Path(new BezierLine(startPose, scorePose));
+                    toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+                }
+                break;
+
+            case SCORING:
+                runScoreLogic();
+                if (false) {
+                    setPathState(RobotState.INTAKE);
+                }
+                break;
+
+        /* You could check for
+        - Follower State: "if(!follower.isBusy()) {}"
+        - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
+        - Robot Position: "if(follower.getPose().getX() > 36) {}"
+        */
+
+            /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+            //if (!follower.isBusy()) {
+            /* Score Preload */
+
+            /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+            // follower.followPath(grabPickup1, true);
+            // setPathState(2);
+            //  }
+            //     break;
+            // case 2:
+            /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
+            //  if (!follower.isBusy()) {
+            /* Grab Sample */
+
+            /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
+            //      follower.followPath(scorePickup1, true);
+            //      setPathState(3);
+            //   }
+            //    break;
+        }
+        follower.setPose(getRobotPoseFromCamera());
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -420,10 +397,4 @@ public class AutoTest extends OpMode {
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
     }
-
-    @Override
-    public void init_loop() {}
-
-    @Override
-    public void stop() {}
 }
