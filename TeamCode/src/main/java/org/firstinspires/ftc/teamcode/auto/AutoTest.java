@@ -176,12 +176,13 @@ public class AutoTest extends OpMode {
             turnPower = error * 0.005;
         }
 
-        if (gamepad1.a) {
+
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
-
-            sleep(800);
+        if (pathTimer > 0.8) {
             kicker.setPosition(KICKER_FIRE);
+        }
+
             sleep(300);
 
             kicker.setPosition(KICKER_REST);
@@ -205,31 +206,12 @@ public class AutoTest extends OpMode {
             driveDirection = 1.0;
             currentState = DualCameraTeleOp.RobotState.DRIVER_CONTROL;
         }*/
-    }
+
 
     // ==========================================================================
     //                             HELPER CLASSES
     // ==========================================================================
 
-    class IntakeSlot {
-        int id;
-        boolean occupied;
-        String color;
-        boolean isClawOpen;
-        Servo clawServo;
-
-        public IntakeSlot(int id, Servo servo) {
-            this.id = id;
-            this.clawServo = servo;
-            this.occupied = false;
-            this.color = "None";
-            this.isClawOpen = false;
-        }
-
-        public void updateServo() {
-            clawServo.setPosition(isClawOpen ? CLAW_OPEN : CLAW_CLOSE);
-        }
-    }
 
     private void initLogic() {
         slots.add(new IntakeSlot(1, claw1));
@@ -396,5 +378,24 @@ public class AutoTest extends OpMode {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
+    }
+}
+class IntakeSlot {
+    int id;
+    boolean occupied;
+    String color;
+    boolean isClawOpen;
+    Servo clawServo;
+
+    public IntakeSlot(int id, Servo servo) {
+        this.id = id;
+        this.clawServo = servo;
+        this.occupied = false;
+        this.color = "None";
+        this.isClawOpen = false;
+    }
+
+    public void updateServo() {
+        clawServo.setPosition(isClawOpen ? CLAW_OPEN : CLAW_CLOSE);
     }
 }
