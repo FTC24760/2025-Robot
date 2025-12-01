@@ -157,7 +157,6 @@ public class AutoTest extends LinearOpMode {
 
     // ==========================================================================
     //                         SCORE LOGIC (HuskyLens - Back)
-    // ==========================================================================
     private void runScoreLogic() {
         switch (scoringState) {
             case 0:
@@ -197,6 +196,7 @@ public class AutoTest extends LinearOpMode {
         }
     }
 
+    // ==========================================================================
     // ==========================================================================
     //                             HELPER CLASSES
     // ==========================================================================
@@ -331,7 +331,6 @@ public class AutoTest extends LinearOpMode {
                         toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
                     }
                     break;
-
             }
             follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
