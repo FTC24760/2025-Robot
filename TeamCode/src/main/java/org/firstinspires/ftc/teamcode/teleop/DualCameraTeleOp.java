@@ -20,7 +20,6 @@ import java.util.List;
 
 @TeleOp(name="Dual-Camera Motif TeleOp v2", group="Competition")
 public class DualCameraTeleOp extends LinearOpMode {
-
     // --- HARDWARE ---
     private DcMotor lf, lb, rf, rb;
     private DcMotor flywheelL, flywheelR;
@@ -145,9 +144,10 @@ public class DualCameraTeleOp extends LinearOpMode {
     private void runIntakeLogic() {
         // 1. Spin Intake Active
         intakeSpinner.setPower(1.0); // <--- NEW: Spins 'in'
-
+        targetSlotIndex = getNextEmptySlot();
         // 2. Servo Setup
-        revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
+        if (targetSlotIndex != -1)
+            revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
         slots.get(targetSlotIndex).isClawOpen = true;
 
         LLResult result = limelight.getLatestResult();

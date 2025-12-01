@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ftc.FTCCoordinates;
@@ -14,7 +14,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -23,14 +23,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.teleop.DualCameraTeleOp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Autonomous(name = "Example Auto", group = "Examples")
-public class AutoTest extends OpMode {
+public class AutoTest extends LinearOpMode {
     private DcMotor lf, lb, rf, rb;
     private DcMotor flywheelL, flywheelR;
     private Servo revolverServo;
@@ -40,14 +39,20 @@ public class AutoTest extends OpMode {
     private IMU imu;
 
     // CAMERAS
-    private Limelight3A limelight;   // FRONT: Intake Alignment
-    private HuskyLens huskyLens;     // BACK:  Score Alignment
+    private Limelight3A limelight; // FRONT: Intake Alignment
+    private HuskyLens huskyLens; // BACK:  Score Alignment
 
     // --- CONSTANTS ---
-    private final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
-    private final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
-    private final double CLAW_OPEN = 0.0;
-    private final double CLAW_CLOSE = 0.17;
+    private final double[] INTAKE_POSITIONS = {
+            0.62,
+            0.245,
+            1.0
+    };
+    private final double[] SCORE_POSITIONS = {
+            0.075,
+            0.805,
+            0.45
+    };
 
     private final double KICKER_REST = 0.75;
     private final double KICKER_FIRE = 0.54;
@@ -58,37 +63,31 @@ public class AutoTest extends OpMode {
     // Adjust DESIRED_TY based on how close you want to be to the ball.
     // If the camera is angled down, -20.0 is usually very close, 0.0 is far.
     private final double DESIRED_TY = -18.0;
-    private final double DRIVE_GAIN = 0.03;  // Speed multiplier for distance
-    private final double TURN_GAIN  = 0.02;  // Speed multiplier for turning
+    private final double DRIVE_GAIN = 0.03; // Speed multiplier for distance
+    private final double TURN_GAIN = 0.02; // Speed multiplier for turning
     private final double MAX_AUTO_SPEED = 0.5; // Safety cap
     // --- GAME LOGIC ---
-    private List<String> motif = new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"));
+    private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     private int motifIndex = 0;
-
-    private List<IntakeSlot> slots = new ArrayList<>();
+    private List < IntakeSlot > slots = new ArrayList < > ();
     private int targetSlotIndex = -1;
-
     private double driveDirection = 1.0;
-
     // Pedropathing variables;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    private enum RobotState {
-        TO_LAUNCH_ZONE,
-        SCORING,
-        INTAKE
 
-    }
-
-    private RobotState pathState;
+    private int pathState;
+    private int scoringState;
     // --------------------------------
     //                          red
     // idk
     private final Pose startPose = new Pose(96, 9, Math.toRadians(90));
     private final Pose scorePose = new Pose(84, 84, Math.toRadians(45));
+    private final Pose finalPose = new Pose(108, 10, Math.toRadians(270));
     private Pose currentPose;
     private Path toLaunchZone;
     public void buildPaths() {
+        toLaunchZone = new Path(new BezierLine(scorePose, finalPose));
     }
     public Pose getRobotPoseFromCamera() {
         //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
@@ -96,7 +95,6 @@ public class AutoTest extends OpMode {
         //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
         return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
-
 
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
@@ -115,7 +113,7 @@ public class AutoTest extends OpMode {
         String detectedLabel = "Unknown";
 
         if (result != null && result.isValid()) {
-            List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+            List < LLResultTypes.DetectorResult > detections = result.getDetectorResults();
             if (!detections.isEmpty()) {
                 LLResultTypes.DetectorResult largest = detections.get(0);
                 detectedLabel = largest.getClassName();
@@ -154,7 +152,6 @@ public class AutoTest extends OpMode {
 
             slots.get(targetSlotIndex).isClawOpen = false;
             intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
-            pathState = RobotState.TO_LAUNCH_ZONE;
         }
     }
 
@@ -162,65 +159,59 @@ public class AutoTest extends OpMode {
     //                         SCORE LOGIC (HuskyLens - Back)
     // ==========================================================================
     private void runScoreLogic() {
-        revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
+        switch (scoringState) {
+            case 0:
+                flywheelL.setPower(SCORING_POWER);
+                flywheelR.setPower(SCORING_POWER);
+                targetSlotIndex = getSlotWithColor(motif.get(motifIndex));
+                revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
+                slots.get(targetSlotIndex).isClawOpen = true;
+                updateRevolverServos();
+                if (actionTimer.getElapsedTimeSeconds() > 0.8) {
+                    scoringState = 0;
+                    actionTimer.resetTimer();
+                }
+                break;
+            case 1:
+                kicker.setPosition(KICKER_FIRE);
+                if (actionTimer.getElapsedTimeSeconds() > 0.3) {
+                    scoringState = 1;
+                    actionTimer.resetTimer();
+                }
+            case 2:
+                kicker.setPosition(KICKER_REST);
+                if (actionTimer.getElapsedTimeSeconds() > 1.2) {
+                    scoringState = 0;
+                    if (allSlotsEmpty()) {
+                        scoringState = -1;
+                        flywheelL.setPower(0);
+                        flywheelR.setPower(0);
+                    }
+                    actionTimer.resetTimer();
 
-        flywheelL.setPower(SCORING_POWER);
-        flywheelR.setPower(SCORING_POWER);
-
-        HuskyLens.Block[] blocks = huskyLens.blocks();
-        double turnPower = 0;
-
-        if (blocks.length > 0) {
-            int targetX = blocks[0].x;
-            double error = 160 - targetX;
-            turnPower = error * 0.005;
+                    slots.get(targetSlotIndex).occupied = false;
+                    slots.get(targetSlotIndex).color = "None";
+                    motifIndex++;
+                    motifIndex = motifIndex % motif.size();
+                }
         }
-
-
-            slots.get(targetSlotIndex).isClawOpen = true;
-            updateRevolverServos();
-        if (pathTimer > 0.8) {
-            kicker.setPosition(KICKER_FIRE);
-        }
-
-            sleep(300);
-
-            kicker.setPosition(KICKER_REST);
-            sleep(1200);
-
-            slots.get(targetSlotIndex).occupied = false;
-            slots.get(targetSlotIndex).color = "None";
-
-            motifIndex++;
-            motifIndex = motifIndex % motif.size();
-
-            flywheelL.setPower(0);
-            flywheelR.setPower(0);
-            driveDirection = 1.0;
-            pathState = RobotState.INTAKE;
-        }
-
-        /*if (gamepad1.b) {
-            flywheelL.setPower(0);
-            flywheelR.setPower(0);
-            driveDirection = 1.0;
-            currentState = DualCameraTeleOp.RobotState.DRIVER_CONTROL;
-        }*/
-
+    }
 
     // ==========================================================================
     //                             HELPER CLASSES
     // ==========================================================================
-
 
     private void initLogic() {
         slots.add(new IntakeSlot(1, claw1));
         slots.add(new IntakeSlot(2, claw2));
         slots.add(new IntakeSlot(3, claw3));
 
-        slots.get(0).occupied = true; slots.get(0).color = "Green";
-        slots.get(1).occupied = true; slots.get(1).color = "Purple";
-        slots.get(2).occupied = true; slots.get(2).color = "Purple";
+        slots.get(0).occupied = true;
+        slots.get(0).color = "Green";
+        slots.get(1).occupied = true;
+        slots.get(1).color = "Purple";
+        slots.get(2).occupied = true;
+        slots.get(2).color = "Purple";
     }
 
     private int getNextEmptySlot() {
@@ -238,15 +229,15 @@ public class AutoTest extends OpMode {
         }
         return -1;
     }
-
-    private void updateRevolverServos() {
-        for (IntakeSlot slot : slots) slot.updateServo();
+    private boolean allSlotsEmpty() {
+        for (int i = 0; i < 3; i++)
+            if (slots.get(i).occupied)
+                return false;
+        return true;
     }
-
-    // ==========================================================================
-    //                             DRIVETRAIN
-    // ==========================================================================
-
+    private void updateRevolverServos() {
+        for (IntakeSlot slot: slots) slot.updateServo();
+    }
 
     private void initHardware() {
         lf = hardwareMap.get(DcMotor.class, "flDrive");
@@ -294,93 +285,67 @@ public class AutoTest extends OpMode {
     /**
      * These change the states of the paths and actions. It will also reset the timers of the individual switches
      **/
-    public void setPathState(RobotState pState) {
+    public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
     }
-
-    @Override
-    public void init() {
+    public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
+        waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(new Pose());
-
-    }
-    @Override
-    public void start() {
         opmodeTimer.resetTimer();
-        setPathState(RobotState.TO_LAUNCH_ZONE);
-    }
-    @Override
-    public void loop() {
+        setPathState(0);
 
-        // These loop the movements of the robot, these must be called continuously in order to work
-        follower.update();
-        switch (pathState) {
-            case TO_LAUNCH_ZONE:
-                follower.followPath(toLaunchZone);
-                if (!follower.isBusy())
-                    setPathState(RobotState.SCORING);
-                break;
+        while (opModeIsActive()) {
+            // These loop the movements of the robot, these must be called continuously in order to work
+            follower.update();
+            switch (pathState) {
+                case 0:
+                    follower.followPath(toLaunchZone);
+                    if (!follower.isBusy()) {
+                        setPathState(1);
+                        scoringState = 0;
+                        actionTimer.resetTimer();
+                    }
+                    break;
+                case 1:
+                    runScoreLogic();
+                    if (scoringState == -1) {
+                        setPathState(2);
+                    }
+                    break;
+                case 2:
+                    follower.followPath(toLaunchZone);
+                case 3:
+                    runIntakeLogic();
+                    if (false) {
+                        //currentPose =
+                        setPathState(4);
+                        toLaunchZone = new Path(new BezierLine(startPose, scorePose));
+                        toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+                    }
+                    break;
 
-            case INTAKE:
-                runIntakeLogic();
-                if (false) {
-                    //currentPose =
-                    setPathState(RobotState.TO_LAUNCH_ZONE);
-                    toLaunchZone = new Path(new BezierLine(startPose, scorePose));
-                    toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-                }
-                break;
-
-            case SCORING:
-                runScoreLogic();
-                if (false) {
-                    setPathState(RobotState.INTAKE);
-                }
-                break;
-
-        /* You could check for
-        - Follower State: "if(!follower.isBusy()) {}"
-        - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-        - Robot Position: "if(follower.getPose().getX() > 36) {}"
-        */
-
-            /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-            //if (!follower.isBusy()) {
-            /* Score Preload */
-
-            /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-            // follower.followPath(grabPickup1, true);
-            // setPathState(2);
-            //  }
-            //     break;
-            // case 2:
-            /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-            //  if (!follower.isBusy()) {
-            /* Grab Sample */
-
-            /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-            //      follower.followPath(scorePickup1, true);
-            //      setPathState(3);
-            //   }
-            //    break;
+            }
+            follower.setPose(getRobotPoseFromCamera());
+            // Feedback to Driver Hub for debugging
+            telemetry.addData("path state", pathState);
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
+            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.update();
         }
-        follower.setPose(getRobotPoseFromCamera());
-        // Feedback to Driver Hub for debugging
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
     }
 }
 class IntakeSlot {
+    private final double CLAW_OPEN = 0.0;
+    private final double CLAW_CLOSE = 0.17;
     int id;
     boolean occupied;
     String color;
