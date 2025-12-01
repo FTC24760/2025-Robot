@@ -26,7 +26,7 @@ public class DualCameraTeleOp extends LinearOpMode {
     private Servo revolverServo;
     private Servo claw1, claw2, claw3;
     private Servo kicker;
-    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
+    private DcMotor intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
     private IMU imu;
 
     // CAMERAS
@@ -210,7 +210,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
 
         flywheelL.setPower(SCORING_POWER);
-        flywheelR.setPower(SCORING_POWER);
+        //flywheelR.setPower(SCORING_POWER);
 
         HuskyLens.Block[] blocks = huskyLens.blocks();
         double turnPower = 0;
@@ -241,14 +241,14 @@ public class DualCameraTeleOp extends LinearOpMode {
             motifIndex = motifIndex % motif.size();
 
             flywheelL.setPower(0);
-            flywheelR.setPower(0);
+            //flywheelR.setPower(0);
             driveDirection = 1.0;
             currentState = RobotState.DRIVER_CONTROL;
         }
 
         if (gamepad1.b) {
             flywheelL.setPower(0);
-            flywheelR.setPower(0);
+            //flywheelR.setPower(0);
             driveDirection = 1.0;
             currentState = RobotState.DRIVER_CONTROL;
         }
@@ -350,11 +350,11 @@ public class DualCameraTeleOp extends LinearOpMode {
         rb.setDirection(DcMotor.Direction.FORWARD);
 
         flywheelL = hardwareMap.get(DcMotor.class, "leftShooter");
-        flywheelR = hardwareMap.get(DcMotor.class, "rightShooter");
-        flywheelR.setDirection(DcMotorSimple.Direction.REVERSE);
+        //flywheelR = hardwareMap.get(DcMotor.class, "rightShooter");
+        //flywheelR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         flywheelL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheelR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //flywheelR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         revolverServo = hardwareMap.get(Servo.class, "revolver");
         claw1 = hardwareMap.get(Servo.class, "slot1");
@@ -365,7 +365,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         kicker.setPosition(KICKER_REST);
 
         // --- INTAKE SPINNER ---
-        intakeSpinner = hardwareMap.get(CRServo.class, "intake");
+        intakeSpinner = hardwareMap.get(DcMotor.class, "intake");
         intakeSpinner.setPower(0); // Ensure off at start
 
         imu = hardwareMap.get(IMU.class, "imu");
