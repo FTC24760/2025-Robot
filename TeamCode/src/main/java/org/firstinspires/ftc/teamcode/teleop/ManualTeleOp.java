@@ -29,6 +29,7 @@ public class ManualTeleOp extends LinearOpMode {
     private DcMotor flywheelL, flywheelR;
     private Servo revolverServo;
     private Servo claw1, claw2, claw3;
+    private Servo light1, light2, light3;
     private Servo kicker;
     private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
     private IMU imu;
@@ -103,7 +104,7 @@ public class ManualTeleOp extends LinearOpMode {
 
                     //driveFieldCentric(y, x, rx);
 
-                    if (gamepad1.right_bumper) {
+                    if (gamepad1.right_bumper || gamepad2.right_bumper) {
                         targetSlotIndex = getNextEmptySlot();
                         if (targetSlotIndex != -1) {
                             driveDirection = 1.0;
@@ -111,7 +112,7 @@ public class ManualTeleOp extends LinearOpMode {
                         }
                     }
 
-                    if (gamepad1.left_bumper) {
+                    if (gamepad1.left_bumper || gamepad2.left_bumper) {
                         String requiredColor = motif.get(motifIndex);
                         /*targetSlotIndex = getSlotWithColor(requiredColor);
 
@@ -142,6 +143,9 @@ public class ManualTeleOp extends LinearOpMode {
             updateRevolverServos();
 
             // 4. TELEMETRY
+            telemetry.addData("Slot 1", slots.get(0).color);
+            telemetry.addData("Slot 2", slots.get(1).color);
+            telemetry.addData("Slot 3", slots.get(2).color);
             telemetry.addData("Mode", currentState);
             telemetry.addData("Motif Need", motif.get(motifIndex));
             telemetry.addData("Drive Dir", driveDirection > 0 ? "FWD (Intake)" : "REV (Score)");
@@ -194,7 +198,7 @@ public class ManualTeleOp extends LinearOpMode {
         driveRobot(drivePower, gamepad1.left_stick_x, turnPower);*/
 
         // 4. Capture/Exit Logic
-        if (gamepad1.a) {
+        if (gamepad1.a || gamepad2.a) {
             if (slots.get(targetSlotIndex).occupied) {
                 slots.get(targetSlotIndex).occupied = false;
                 slots.get(targetSlotIndex).isClawOpen = true;
@@ -206,7 +210,7 @@ public class ManualTeleOp extends LinearOpMode {
             updateRevolverServos();
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.b || gamepad2.b) {
             intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
             currentState = RobotState.DRIVER_CONTROL;
         }
@@ -218,7 +222,7 @@ public class ManualTeleOp extends LinearOpMode {
     private void runScoreLogic() {
         switch (scoringState) {
             case -1:
-                if (gamepad1.a) {
+                if (gamepad1.a || gamepad2.a) {
                     scoringState = 0;
                     actionTimer.resetTimer();
                 }
@@ -256,6 +260,7 @@ public class ManualTeleOp extends LinearOpMode {
         }
         if (gamepad1.b) {
             scoringState = -1;
+            currentState = RobotState.DRIVER_CONTROL;
             flywheelL.setPower(0);
             flywheelR.setPower(0);
         }
@@ -271,10 +276,12 @@ public class ManualTeleOp extends LinearOpMode {
         String color;
         boolean isClawOpen;
         Servo clawServo;
+        Servo indicatorLight;
 
-        public IntakeSlot(int id, Servo servo) {
+        public IntakeSlot(int id, Servo servo, Servo indicatorLight) {
             this.id = id;
             this.clawServo = servo;
+            this.indicatorLight = indicatorLight;
             this.occupied = false;
             this.color = "None";
             this.isClawOpen = false;
@@ -282,13 +289,18 @@ public class ManualTeleOp extends LinearOpMode {
 
         public void updateServo() {
             clawServo.setPosition(isClawOpen ? CLAW_OPEN : CLAW_CLOSE);
+            indicatorLight.setPosition(0);
+            if (this.color == "Green")
+                indicatorLight.setPosition(0.5);
+            else if (this.color == "Purple")
+                indicatorLight.setPosition(0.7);
         }
     }
 
     private void initLogic() {
-        slots.add(new IntakeSlot(1, claw1));
-        slots.add(new IntakeSlot(2, claw2));
-        slots.add(new IntakeSlot(3, claw3));
+        slots.add(new IntakeSlot(1, claw1, light1));
+        slots.add(new IntakeSlot(2, claw2, light2));
+        slots.add(new IntakeSlot(3, claw3, light3));
 
         slots.get(0).occupied = true; slots.get(0).color = "Green";
         slots.get(1).occupied = true; slots.get(1).color = "Purple";
@@ -314,7 +326,9 @@ public class ManualTeleOp extends LinearOpMode {
     }
 
     private void updateRevolverServos() {
-        for (IntakeSlot slot : slots) slot.updateServo();
+        for (IntakeSlot slot : slots) {
+            slot.updateServo();
+        }
     }
 
     // ==========================================================================
@@ -369,6 +383,10 @@ public class ManualTeleOp extends LinearOpMode {
         claw1 = hardwareMap.get(Servo.class, "slot1");
         claw2 = hardwareMap.get(Servo.class, "slot2");
         claw3 = hardwareMap.get(Servo.class, "slot3");
+
+        light1 = hardwareMap.get(Servo.class, "light1");
+        light2 = hardwareMap.get(Servo.class, "light2");
+        light3 = hardwareMap.get(Servo.class, "light3");
 
         kicker = hardwareMap.get(Servo.class, "kicker");
         kicker.setPosition(KICKER_REST);
