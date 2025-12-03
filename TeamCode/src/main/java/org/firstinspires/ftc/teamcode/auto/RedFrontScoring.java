@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Example Auto", group = "Examples")
-public class AutoTest extends LinearOpMode {
+@Autonomous(name = "Red Front", group = "Auto")
+public class RedFrontScoring extends LinearOpMode {
     private DcMotor lf, lb, rf, rb;
     private DcMotor flywheelL, flywheelR;
     private Servo revolverServo;

@@ -31,7 +31,7 @@ public class ManualTeleOp extends LinearOpMode {
     private Servo claw1, claw2, claw3;
     private Servo light1, light2, light3;
     private Servo kicker;
-    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
+    private DcMotor intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
     private IMU imu;
 
     // CAMERAS
@@ -93,9 +93,14 @@ public class ManualTeleOp extends LinearOpMode {
             double rx = gamepad1.right_stick_x;
 
             driveFieldCentric(y, x, rx);
-            if (gamepad1.dpad_left || gamepad2.dpad_left) targetSlotIndex = 0;
-            if (gamepad1.dpad_up || gamepad2.dpad_up) targetSlotIndex = 1;
-            if (gamepad1.dpad_right || gamepad2.dpad_right) targetSlotIndex = 2;
+            if (gamepad1.dpad_left || gamepad2.dpad_left) {
+                int s = getSlotWithColor("Purple");
+                if (s != -1) targetSlotIndex = s;
+            }
+            if (gamepad1.dpad_right || gamepad2.dpad_right) {
+                int s = getSlotWithColor("Green");
+                if (s != -1) targetSlotIndex = s;
+            }
             // 2. STATE HANDLING
             switch (currentState) {
                 case DRIVER_CONTROL:
@@ -122,6 +127,7 @@ public class ManualTeleOp extends LinearOpMode {
                         } else {
                             telemetry.addData("Alert", "No " + requiredColor + " found!");
                         }*/
+                        scoringState = -1;
                         currentState = RobotState.AUTO_ALIGN_SCORE;
                     }
 
@@ -198,14 +204,29 @@ public class ManualTeleOp extends LinearOpMode {
         driveRobot(drivePower, gamepad1.left_stick_x, turnPower);*/
 
         // 4. Capture/Exit Logic
-        if (gamepad1.a || gamepad2.a) {
+        if (gamepad1.dpad_left || gamepad2.dpad_left) {
             if (slots.get(targetSlotIndex).occupied) {
                 slots.get(targetSlotIndex).occupied = false;
                 slots.get(targetSlotIndex).isClawOpen = true;
+                slots.get(targetSlotIndex).color = "Purple";
             }
             else {
                 slots.get(targetSlotIndex).occupied = true;
                 slots.get(targetSlotIndex).isClawOpen = false;
+                slots.get(targetSlotIndex).color = "None";
+            }
+            updateRevolverServos();
+        }
+        if (gamepad1.dpad_right || gamepad2.dpad_right) {
+            if (slots.get(targetSlotIndex).occupied) {
+                slots.get(targetSlotIndex).occupied = false;
+                slots.get(targetSlotIndex).isClawOpen = true;
+                slots.get(targetSlotIndex).color = "Green";
+            }
+            else {
+                slots.get(targetSlotIndex).occupied = true;
+                slots.get(targetSlotIndex).isClawOpen = false;
+                slots.get(targetSlotIndex).color = "None";
             }
             updateRevolverServos();
         }
@@ -232,16 +253,15 @@ public class ManualTeleOp extends LinearOpMode {
                 targetSlotIndex = getSlotWithColor(motif.get(motifIndex));
                 revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
                 slots.get(targetSlotIndex).isClawOpen = true;
-                updateRevolverServos();
                 if (actionTimer.getElapsedTimeSeconds() > 0.8) {
-                    scoringState = 0;
+                    scoringState = 1;
                     actionTimer.resetTimer();
                 }
                 break;
             case 1:
                 kicker.setPosition(KICKER_FIRE);
                 if (actionTimer.getElapsedTimeSeconds() > 0.3) {
-                    scoringState = 1;
+                    scoringState = 2;
                     actionTimer.resetTimer();
                 }
             case 2:
@@ -252,6 +272,7 @@ public class ManualTeleOp extends LinearOpMode {
                     actionTimer.resetTimer();
 
                     slots.get(targetSlotIndex).occupied = false;
+                    slots.get(targetSlotIndex).isClawOpen = true;
                     slots.get(targetSlotIndex).color = "None";
                     motifIndex++;
                     motifIndex = motifIndex % motif.size();
@@ -302,9 +323,9 @@ public class ManualTeleOp extends LinearOpMode {
         slots.add(new IntakeSlot(2, claw2, light2));
         slots.add(new IntakeSlot(3, claw3, light3));
 
-        slots.get(0).occupied = true; slots.get(0).color = "Green";
+        slots.get(0).occupied = true; slots.get(0).color = "Purple";
         slots.get(1).occupied = true; slots.get(1).color = "Purple";
-        slots.get(2).occupied = true; slots.get(2).color = "Purple";
+        slots.get(2).occupied = true; slots.get(2).color = "Green";
 
         actionTimer = new Timer();
     }
@@ -384,15 +405,15 @@ public class ManualTeleOp extends LinearOpMode {
         claw2 = hardwareMap.get(Servo.class, "slot2");
         claw3 = hardwareMap.get(Servo.class, "slot3");
 
-        light1 = hardwareMap.get(Servo.class, "light1");
-        light2 = hardwareMap.get(Servo.class, "light2");
-        light3 = hardwareMap.get(Servo.class, "light3");
+        light1 = hardwareMap.get(Servo.class, "led1");
+        light2 = hardwareMap.get(Servo.class, "led2");
+        light3 = hardwareMap.get(Servo.class, "led3");
 
         kicker = hardwareMap.get(Servo.class, "kicker");
         kicker.setPosition(KICKER_REST);
 
         // --- INTAKE SPINNER ---
-        intakeSpinner = hardwareMap.get(CRServo.class, "intake");
+        intakeSpinner = hardwareMap.get(DcMotor.class, "intake");
         intakeSpinner.setPower(0); // Ensure off at start
 
         imu = hardwareMap.get(IMU.class, "imu");
