@@ -8,6 +8,7 @@ import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -27,14 +28,15 @@ public class Constants {
     }
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
-            .rightFrontMotorName("rfDrive")
+            .rightFrontMotorName("frDrive")
             .rightRearMotorName("rrDrive")
-            .leftRearMotorName("lrDrive")
-            .leftFrontMotorName("lfDrive")
+            .leftRearMotorName("rlDrive")
+            .leftFrontMotorName("flDrive")
             .leftFrontMotorDirection(DcMotor.Direction.REVERSE)
             .leftRearMotorDirection(DcMotor.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotor.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotor.Direction.FORWARD);
+            .rightRearMotorDirection(DcMotor.Direction.FORWARD)
+            .xVelocity(73.8362);
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(2.1) // vertical distance from horizontal center of robot
             .strafePodX(1.9) // horizontal distance from vertical center of robot
