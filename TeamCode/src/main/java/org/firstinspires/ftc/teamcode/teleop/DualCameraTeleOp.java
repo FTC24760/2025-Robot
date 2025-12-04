@@ -61,7 +61,12 @@ public class DualCameraTeleOp extends LinearOpMode {
     private RobotState currentState = RobotState.DRIVER_CONTROL;
 
     // --- GAME LOGIC ---
-    private List<String> motif = new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"));
+    private List<List<String>> motifs = new ArrayList<>(Arrays.asList(
+            new ArrayList<>(Arrays.asList("Green", "Purple", "Purple")),
+            new ArrayList<>(Arrays.asList("Purple", "Green", "Purple")),
+            new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"))
+    ));
+    private List<String> motif = motifs.get(0);
     private int motifIndex = 0;
 
     private List<IntakeSlot> slots = new ArrayList<>();
@@ -101,8 +106,12 @@ public class DualCameraTeleOp extends LinearOpMode {
                         }
                     }
 
-                    if (gamepad1.left_bumper || gamepad2.left_bumper) {
-                        String requiredColor = motif.get(motifIndex);
+                    if (gamepad1.dpad_left || gamepad2.dpad_left ||
+                        gamepad1.dpad_right || gamepad2.dpad_right) {
+                        String requiredColor;
+                        if (gamepad1.dpad_left || gamepad2.dpad_left) requiredColor = "Purple";
+                        else requiredColor = "Green";
+
                         targetSlotIndex = getSlotWithColor(requiredColor);
 
                         if (targetSlotIndex != -1) {
@@ -131,6 +140,9 @@ public class DualCameraTeleOp extends LinearOpMode {
             updateRevolverServos();
 
             // 4. TELEMETRY
+            telemetry.addData("Slot 1", slots.get(0).color);
+            telemetry.addData("Slot 2", slots.get(1).color);
+            telemetry.addData("Slot 3", slots.get(2).color);
             telemetry.addData("Mode", currentState);
             telemetry.addData("Motif Need", motif.get(motifIndex));
             telemetry.addData("Drive Dir", driveDirection > 0 ? "FWD (Intake)" : "REV (Score)");
