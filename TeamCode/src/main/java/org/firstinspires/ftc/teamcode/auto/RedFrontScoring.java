@@ -81,38 +81,61 @@ public class RedFrontScoring extends LinearOpMode {
     // --------------------------------
     //                          red
     // idk
-    private final Pose startPose = new Pose(96, 9, Math.toRadians(90));
-    private final Pose scorePose = new Pose(84, 84, Math.toRadians(45));
-    private final Pose finalPose = new Pose(108, 10, Math.toRadians(270));
+
     private Pose currentPose;
-    private Path toLaunchZone;
-    public void buildPaths() {
-        toLaunchZone = new Path(new BezierLine(scorePose, finalPose));
-    }
+    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
+    public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
     public Pose getRobotPoseFromCamera() {
         //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
         //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
         //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
         return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
+    public static class Paths {
+        public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
+        public Paths(Follower follower) {
+            Path1 = new Path(new BezierLine(new Pose(122.000, 122.000), new Pose(84.000, 84.000)));
+            Path1.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(225));
+
+            Path2 = new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(102.000, 84.000)));
+            Path2.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(0));
+
+            Path3= new Path(new BezierLine(new Pose(102.000, 84.000), new Pose(108.000, 84.000)));
+            Path3.setConstantHeadingInterpolation(Math.toRadians(0));
+
+            Path4= new Path(new BezierLine(new Pose(108.000, 84.000), new Pose(112.000, 84.000)));
+            Path4.setConstantHeadingInterpolation(Math.toRadians(0));
+
+            Path5= new Path(new BezierLine(new Pose(112.000, 84.000), new Pose(118.000, 84.000)));
+            Path5.setConstantHeadingInterpolation(Math.toRadians(0));
+
+            Path6 = new Path(new BezierLine(new Pose(118.000, 84.000), new Pose(84.000, 84.000)));
+            Path6.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians((225)));
+
+            Path7= new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(84.000, 60.000)));
+            Path7.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(315));
+        }
+    }
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
-    private void runIntakeLogic() {
-        // 1. Spin Intake Active
-        intakeSpinner.setPower(1.0); // <--- NEW: Spins 'in'
-
-        // 2. Servo Setup
+    private void startIntake() {
         revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
         slots.get(targetSlotIndex).isClawOpen = true;
+
+    }
+    private void runIntakeLogic() {
+
+        // 2. Servo Setup
+
 
         LLResult result = limelight.getLatestResult();
         double turnPower = 0;
         double drivePower = 0; // <--- NEW: Forward/Back Power
         String detectedLabel = "Unknown";
 
-        if (result != null && result.isValid()) {
+        /*if (result != null && result.isValid()) {
             List < LLResultTypes.DetectorResult > detections = result.getDetectorResults();
             if (!detections.isEmpty()) {
                 LLResultTypes.DetectorResult largest = detections.get(0);
@@ -134,25 +157,21 @@ public class RedFrontScoring extends LinearOpMode {
                 if (drivePower > MAX_AUTO_SPEED) drivePower = MAX_AUTO_SPEED;
                 if (drivePower < -MAX_AUTO_SPEED) drivePower = -MAX_AUTO_SPEED;
             }
-        }
-
+        }*/
         // 3. Drive Robot (Auto Y, Manual X, Auto Turn)
         // We override the 'y' stick with our calculated drivePower
         //driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
 
         // 4. Capture/Exit Logic
-        if (gamepad1.a) {
-            slots.get(targetSlotIndex).occupied = true;
-            // Simple color logic based on label
-            if (detectedLabel.toLowerCase().contains("green")) {
-                slots.get(targetSlotIndex).color = "Green";
-            } else {
-                slots.get(targetSlotIndex).color = "Purple";
-            }
-
-            slots.get(targetSlotIndex).isClawOpen = false;
-            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
+        slots.get(targetSlotIndex).occupied = true;
+        // Simple color logic based on label
+        if (detectedLabel.toLowerCase().contains("green")) {
+            slots.get(targetSlotIndex).color = "Green";
+        } else {
+            slots.get(targetSlotIndex).color = "Purple";
         }
+
+        slots.get(targetSlotIndex).isClawOpen = false;
     }
 
     // ==========================================================================
@@ -187,7 +206,7 @@ public class RedFrontScoring extends LinearOpMode {
                         flywheelR.setPower(0);
                     }
                     actionTimer.resetTimer();
-
+                    slots.get(targetSlotIndex).isClawOpen = false;
                     slots.get(targetSlotIndex).occupied = false;
                     slots.get(targetSlotIndex).color = "None";
                     motifIndex++;
@@ -297,7 +316,6 @@ public class RedFrontScoring extends LinearOpMode {
         waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
-        buildPaths();
         follower.setStartingPose(new Pose());
         opmodeTimer.resetTimer();
         setPathState(0);
@@ -307,7 +325,7 @@ public class RedFrontScoring extends LinearOpMode {
             follower.update();
             switch (pathState) {
                 case 0:
-                    follower.followPath(toLaunchZone);
+                    follower.followPath(Paths.Path1);
                     if (!follower.isBusy()) {
                         setPathState(1);
                         scoringState = 0;
@@ -315,23 +333,83 @@ public class RedFrontScoring extends LinearOpMode {
                     }
                     break;
                 case 1:
+                    follower.holdPoint(scorePose);
                     runScoreLogic();
                     if (scoringState == -1) {
                         setPathState(2);
+                        targetSlotIndex = getNextEmptySlot();
+                        startIntake();
                     }
                     break;
                 case 2:
-                    follower.followPath(toLaunchZone);
+                    follower.followPath(Paths.Path2);
+                    intakeSpinner.setPower(1);
+                    if (!follower.isBusy()) {
+                        slots.get(targetSlotIndex).isClawOpen = false;
+                        slots.get(targetSlotIndex).color = "Purple";
+                        slots.get(targetSlotIndex).occupied = true;
+
+                        setPathState(3);
+                        actionTimer.resetTimer();
+                    }
                 case 3:
-                    runIntakeLogic();
-                    if (false) {
-                        //currentPose =
+                    follower.followPath(Paths.Path3);
+                    if (actionTimer.getElapsedTimeSeconds() > 0.1) {
+                        targetSlotIndex = getNextEmptySlot();
+                        startIntake();
+                    }
+                    if (!follower.isBusy()) {
+                        slots.get(targetSlotIndex).isClawOpen = false;
+                        slots.get(targetSlotIndex).color = "Purple";
+                        slots.get(targetSlotIndex).occupied = true;
+
                         setPathState(4);
-                        toLaunchZone = new Path(new BezierLine(startPose, scorePose));
-                        toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+                        actionTimer.resetTimer();
                     }
                     break;
+                case 4:
+                    follower.followPath(Paths.Path4);
+                    if (actionTimer.getElapsedTimeSeconds() > 0.1) {
+                        targetSlotIndex = getNextEmptySlot();
+                        startIntake();
+                    }
+                    if (!follower.isBusy()) {
+                        slots.get(targetSlotIndex).isClawOpen = false;
+                        slots.get(targetSlotIndex).color = "Green";
+                        slots.get(targetSlotIndex).occupied = true;
+
+                        intakeSpinner.setPower(0);
+
+                        setPathState(5);
+                        actionTimer.resetTimer();
+                    }
+                    break;
+                case 5:
+                    follower.followPath(Paths.Path5);
+                    if (!follower.isBusy()) {
+                        setPathState(6);
+                        actionTimer.resetTimer();
+                    }
+                case 6:
+                    follower.holdPoint(scorePose);
+                    runScoreLogic();
+                    if (scoringState == -1) {
+                        setPathState(7);
+                        targetSlotIndex = getNextEmptySlot();
+                        startIntake();
+                    }
+                    break;
+                case 7:
+                    follower.followPath(Paths.Path6);
+                    if (!follower.isBusy()) {
+                        setPathState(8);
+                        actionTimer.resetTimer();
+                    }
+                    break;
+                case 8:
+                    follower.holdPoint(parkPose);
             }
+            updateRevolverServos();
             follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
             telemetry.addData("path state", pathState);
