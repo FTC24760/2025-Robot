@@ -93,7 +93,7 @@ public class DualCameraTeleOp extends LinearOpMode {
 
                     driveFieldCentric(y, x, rx);
 
-                    if (gamepad1.right_bumper) {
+                    if (gamepad1.right_bumper || gamepad2.right_bumper) {
                         targetSlotIndex = getNextEmptySlot();
                         if (targetSlotIndex != -1) {
                             driveDirection = 1.0;
@@ -101,7 +101,7 @@ public class DualCameraTeleOp extends LinearOpMode {
                         }
                     }
 
-                    if (gamepad1.left_bumper) {
+                    if (gamepad1.left_bumper || gamepad2.left_bumper) {
                         String requiredColor = motif.get(motifIndex);
                         targetSlotIndex = getSlotWithColor(requiredColor);
 
@@ -183,7 +183,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
 
         // 4. Capture/Exit Logic
-        if (gamepad1.a) {
+        if (gamepad1.a || gamepad2.a) {
             slots.get(targetSlotIndex).occupied = true;
             // Simple color logic based on label
             if (detectedLabel.toLowerCase().contains("green")) {
@@ -197,7 +197,7 @@ public class DualCameraTeleOp extends LinearOpMode {
             currentState = RobotState.DRIVER_CONTROL;
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.b || gamepad2.b) {
             intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
             currentState = RobotState.DRIVER_CONTROL;
         }
@@ -223,7 +223,7 @@ public class DualCameraTeleOp extends LinearOpMode {
 
         driveRobot(gamepad1.left_stick_y, gamepad1.left_stick_x, turnPower);
 
-        if (gamepad1.a) {
+        if (gamepad1.a || gamepad2.a) {
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
 
@@ -246,7 +246,7 @@ public class DualCameraTeleOp extends LinearOpMode {
             currentState = RobotState.DRIVER_CONTROL;
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.b || gamepad2.b) {
             flywheelL.setPower(0);
             flywheelR.setPower(0);
             driveDirection = 1.0;

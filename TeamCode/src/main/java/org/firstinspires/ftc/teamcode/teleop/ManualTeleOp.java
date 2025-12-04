@@ -31,7 +31,7 @@ public class ManualTeleOp extends LinearOpMode {
     private Servo claw1, claw2, claw3;
     private Servo light1, light2, light3;
     private Servo kicker;
-    private DcMotor intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
+    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
     private IMU imu;
 
     // CAMERAS
@@ -413,7 +413,7 @@ public class ManualTeleOp extends LinearOpMode {
         kicker.setPosition(KICKER_REST);
 
         // --- INTAKE SPINNER ---
-        intakeSpinner = hardwareMap.get(DcMotor.class, "intake");
+        intakeSpinner = hardwareMap.get(CRServo.class, "intake");
         intakeSpinner.setPower(0); // Ensure off at start
 
         imu = hardwareMap.get(IMU.class, "imu");
