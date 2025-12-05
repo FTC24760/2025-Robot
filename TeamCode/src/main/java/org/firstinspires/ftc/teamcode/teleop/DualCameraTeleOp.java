@@ -42,7 +42,7 @@ public class DualCameraTeleOp extends LinearOpMode {
     private final double KICKER_REST = 0.75;
     private final double KICKER_FIRE = 0.45;
 
-    private final double SCORING_POWER = -1.0;
+    private final double SCORING_POWER = -0.805;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
