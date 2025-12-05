@@ -397,7 +397,10 @@ public class DualCameraTeleOp extends LinearOpMode {
         slots.add(new IntakeSlot(1, claw1));
         slots.add(new IntakeSlot(2, claw2));
         slots.add(new IntakeSlot(3, claw3));
-        for(IntakeSlot s : slots) { s.occupied = false; s.color = "None"; }
+
+        slots.get(0).occupied = true; slots.get(0).color = "Green";
+        slots.get(1).occupied = true; slots.get(1).color = "Purple";
+        slots.get(2).occupied = true; slots.get(2).color = "Purple";
     }
 
     private int getNextEmptySlot() {
