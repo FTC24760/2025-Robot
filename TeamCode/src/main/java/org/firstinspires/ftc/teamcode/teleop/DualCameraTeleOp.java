@@ -195,9 +195,9 @@ public class DualCameraTeleOp extends LinearOpMode {
         intakeSpinner.setPower(1.0);
 
         LLResult result = limelight.getLatestResult();
-        double drivePower = 0;
-        double turnPower  = 0;
-        double strafePower = gamepad1.left_stick_x; // Manual strafe allowed
+        double drivePower = -gamepad1.left_stick_y;
+        double turnPower  = gamepad1.right_stick_x;
+        double strafePower = gamepad1.left_stick_x;
         String detectedLabel = "Unknown";
 
         if (result != null && result.isValid()) {
