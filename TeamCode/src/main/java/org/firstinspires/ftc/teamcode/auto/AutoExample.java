@@ -6,7 +6,6 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -21,105 +20,92 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Red Front Hide", group = "Auto")
-public class HideInACornerSimulator extends LinearOpMode {
-    private DcMotor lf, lb, rf, rb;
-    private DcMotor flywheelL, flywheelR;
-    private Servo revolverServo;
-    private Servo claw1, claw2, claw3;
-    private Servo kicker;
-    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
-    private IMU imu;
+@Autonomous(name = "Rear double score", group = "auto")
+public class AutoExample extends LinearOpMode {
+    public DcMotor lf, lb, rf, rb;
+    public DcMotor flywheelL, flywheelR;
+    public Servo revolverServo;
+    public Servo claw1, claw2, claw3;
+    public Servo kicker;
+    public CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
+    public IMU imu;
 
     // CAMERAS
-    private Limelight3A limelight; // FRONT: Intake Alignment
-    private HuskyLens huskyLens; // BACK:  Score Alignment
+    public Limelight3A limelight; // FRONT: Intake Alignment
+    public HuskyLens huskyLens; // BACK:  Score Alignment
 
     // --- CONSTANTS ---
-    private final double[] INTAKE_POSITIONS = {
+    public final double[] INTAKE_POSITIONS = {
             0.62,
             0.245,
             1.0
     };
-    private final double[] SCORE_POSITIONS = {
+    public final double[] SCORE_POSITIONS = {
             0.075,
             0.805,
             0.45
     };
 
-    private final double KICKER_REST = 0.75;
-    private final double KICKER_FIRE = 0.54;
+    public final double KICKER_REST = 0.75;
+    public final double KICKER_FIRE = 0.54;
 
-    private final double SCORING_POWER = -0.67;
+    public final double SCORING_POWER_HIGH = -0.67;
+    public final double SCORING_POWER_LOW = -0.67;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
     // If the camera is angled down, -20.0 is usually very close, 0.0 is far.
-    private final double DESIRED_TY = -18.0;
-    private final double DRIVE_GAIN = 0.03; // Speed multiplier for distance
-    private final double TURN_GAIN = 0.02; // Speed multiplier for turning
-    private final double MAX_AUTO_SPEED = 0.5; // Safety cap
+    public final double DESIRED_TY = -18.0;
+    public final double DRIVE_GAIN = 0.03; // Speed multiplier for distance
+    public final double TURN_GAIN = 0.02; // Speed multiplier for turning
+    public final double MAX_AUTO_SPEED = 0.5; // Safety cap
     // --- GAME LOGIC ---
-    private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
-    private int motifIndex = 0;
-    private List < IntakeSlot > slots = new ArrayList < > ();
-    private int targetSlotIndex = -1;
-    private double driveDirection = 1.0;
+    public List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
+    public int motifIndex = 0;
+    public List < IntakeSlot > slots = new ArrayList < > ();
+    public int targetSlotIndex = -1;
+    public double driveDirection = 1.0;
     // Pedropathing variables;
-    private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    public Follower follower;
+    public Timer pathTimer, actionTimer, opmodeTimer;
 
-    private int pathState;
-    private int scoringState;
+    public int pathState;
+    public int scoringState;
     // --------------------------------
     //                          red
     // idk
-
-    private Pose currentPose;
-    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
-    public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
+    public Pose currentPose;
+    public Path toLaunchZone;
     public Pose getRobotPoseFromCamera() {
         //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
         //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
         //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
         return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
-    public static class Paths {
-        public static Pose startPose = new Pose(122, 122, Math.toRadians(37));
-        public static Pose endPose = new Pose(84, 132, Math.toRadians(0));
-        public static Path path;
 
-        public Paths(Follower follower) {
-            path = new Path(new BezierLine(startPose, endPose));
-            path.setLinearHeadingInterpolation(startPose.getHeading(), endPose.getHeading());
-        }
-    }
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
-    private void startIntake() {
-        revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
-        slots.get(targetSlotIndex).isClawOpen = true;
-
-    }
-    private void runIntakeLogic() {
+    public void runIntakeLogic() {
+        // 1. Spin Intake Active
+        intakeSpinner.setPower(1.0); // <--- NEW: Spins 'in'
 
         // 2. Servo Setup
-
+        revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
+        slots.get(targetSlotIndex).isClawOpen = true;
 
         LLResult result = limelight.getLatestResult();
         double turnPower = 0;
         double drivePower = 0; // <--- NEW: Forward/Back Power
         String detectedLabel = "Unknown";
 
-        /*if (result != null && result.isValid()) {
+        if (result != null && result.isValid()) {
             List < LLResultTypes.DetectorResult > detections = result.getDetectorResults();
             if (!detections.isEmpty()) {
                 LLResultTypes.DetectorResult largest = detections.get(0);
@@ -141,30 +127,34 @@ public class HideInACornerSimulator extends LinearOpMode {
                 if (drivePower > MAX_AUTO_SPEED) drivePower = MAX_AUTO_SPEED;
                 if (drivePower < -MAX_AUTO_SPEED) drivePower = -MAX_AUTO_SPEED;
             }
-        }*/
+        }
+
         // 3. Drive Robot (Auto Y, Manual X, Auto Turn)
         // We override the 'y' stick with our calculated drivePower
         //driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
 
         // 4. Capture/Exit Logic
-        slots.get(targetSlotIndex).occupied = true;
-        // Simple color logic based on label
-        if (detectedLabel.toLowerCase().contains("green")) {
-            slots.get(targetSlotIndex).color = "Green";
-        } else {
-            slots.get(targetSlotIndex).color = "Purple";
-        }
+        if (gamepad1.a) {
+            slots.get(targetSlotIndex).occupied = true;
+            // Simple color logic based on label
+            if (detectedLabel.toLowerCase().contains("green")) {
+                slots.get(targetSlotIndex).color = "Green";
+            } else {
+                slots.get(targetSlotIndex).color = "Purple";
+            }
 
-        slots.get(targetSlotIndex).isClawOpen = false;
+            slots.get(targetSlotIndex).isClawOpen = false;
+            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
+        }
     }
 
     // ==========================================================================
     //                         SCORE LOGIC (HuskyLens - Back)
-    private void runScoreLogic() {
+    public void runScoreLogic(boolean highSpeed) {
         switch (scoringState) {
             case 0:
-                flywheelL.setPower(SCORING_POWER);
-                flywheelR.setPower(SCORING_POWER);
+                flywheelL.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
+                flywheelR.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
                 targetSlotIndex = getSlotWithColor(motif.get(motifIndex));
                 revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
                 slots.get(targetSlotIndex).isClawOpen = true;
@@ -190,7 +180,7 @@ public class HideInACornerSimulator extends LinearOpMode {
                         flywheelR.setPower(0);
                     }
                     actionTimer.resetTimer();
-                    slots.get(targetSlotIndex).isClawOpen = false;
+
                     slots.get(targetSlotIndex).occupied = false;
                     slots.get(targetSlotIndex).color = "None";
                     motifIndex++;
@@ -198,13 +188,18 @@ public class HideInACornerSimulator extends LinearOpMode {
                 }
         }
     }
+    public void startIntake() {
+        revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
+        slots.get(targetSlotIndex).isClawOpen = true;
+
+    }
 
     // ==========================================================================
     // ==========================================================================
     //                             HELPER CLASSES
     // ==========================================================================
 
-    private void initLogic() {
+    public void initLogic() {
         slots.add(new IntakeSlot(1, claw1));
         slots.add(new IntakeSlot(2, claw2));
         slots.add(new IntakeSlot(3, claw3));
@@ -217,14 +212,14 @@ public class HideInACornerSimulator extends LinearOpMode {
         slots.get(2).color = "Purple";
     }
 
-    private int getNextEmptySlot() {
+    public int getNextEmptySlot() {
         for (int i = 0; i < 3; i++) {
             if (!slots.get(i).occupied) return i;
         }
         return -1;
     }
 
-    private int getSlotWithColor(String neededColor) {
+    public int getSlotWithColor(String neededColor) {
         for (int i = 0; i < 3; i++) {
             if (slots.get(i).occupied && slots.get(i).color.equalsIgnoreCase(neededColor)) {
                 return i;
@@ -232,17 +227,17 @@ public class HideInACornerSimulator extends LinearOpMode {
         }
         return -1;
     }
-    private boolean allSlotsEmpty() {
+    public boolean allSlotsEmpty() {
         for (int i = 0; i < 3; i++)
             if (slots.get(i).occupied)
                 return false;
         return true;
     }
-    private void updateRevolverServos() {
+    public void updateRevolverServos() {
         for (IntakeSlot slot: slots) slot.updateServo();
     }
 
-    private void initHardware() {
+    public void initHardware() {
         lf = hardwareMap.get(DcMotor.class, "flDrive");
         lb = hardwareMap.get(DcMotor.class, "rlDrive");
         rf = hardwareMap.get(DcMotor.class, "frDrive");
@@ -293,47 +288,12 @@ public class HideInACornerSimulator extends LinearOpMode {
         pathTimer.resetTimer();
     }
     public void runOpMode() {
-        pathTimer = new Timer();
-        opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
-
-        waitForStart();
-        initHardware();
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose());
-        opmodeTimer.resetTimer();
-        setPathState(0);
-
-        while (opModeIsActive()) {
-            // These loop the movements of the robot, these must be called continuously in order to work
-            follower.update();
-            switch (pathState) {
-                case 0:
-                    follower.followPath(Paths.path);
-                    if (!follower.isBusy()) {
-                        setPathState(1);
-                        scoringState = 0;
-                        actionTimer.resetTimer();
-                    }
-                    break;
-                case 1:
-                    follower.holdPoint(Paths.endPose);
-                    break;
-
-            }
-            updateRevolverServos();
-            follower.setPose(getRobotPoseFromCamera());
-            // Feedback to Driver Hub for debugging
-            telemetry.addData("path state", pathState);
-            telemetry.addData("x", follower.getPose().getX());
-            telemetry.addData("y", follower.getPose().getY());
-            telemetry.addData("heading", follower.getPose().getHeading());
-            telemetry.update();
-        }
+        
+        
     }
     class IntakeSlot {
-        private final double CLAW_OPEN = 0.0;
-        private final double CLAW_CLOSE = 0.17;
+        public final double CLAW_OPEN = 0.0;
+        public final double CLAW_CLOSE = 0.17;
         int id;
         boolean occupied;
         String color;

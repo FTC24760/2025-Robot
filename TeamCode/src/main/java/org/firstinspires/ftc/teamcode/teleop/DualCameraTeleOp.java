@@ -21,58 +21,58 @@ import java.util.List;
 @TeleOp(name="Dual-Camera Motif TeleOp v2", group="Competition")
 public class DualCameraTeleOp extends LinearOpMode {
     // --- HARDWARE ---
-    private DcMotor lf, lb, rf, rb;
-    private DcMotor flywheelL, flywheelR;
-    private Servo revolverServo;
-    private Servo claw1, claw2, claw3;
-    private Servo kicker;
-    private CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
-    private IMU imu;
+    public DcMotor lf, lb, rf, rb;
+    public DcMotor flywheelL, flywheelR;
+    public Servo revolverServo;
+    public Servo claw1, claw2, claw3;
+    public Servo kicker;
+    public CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
+    public IMU imu;
 
     // CAMERAS
-    private Limelight3A limelight;   // FRONT: Intake Alignment
-    private HuskyLens huskyLens;     // BACK:  Score Alignment
+    public Limelight3A limelight;   // FRONT: Intake Alignment
+    public HuskyLens huskyLens;     // BACK:  Score Alignment
 
     // --- CONSTANTS ---
-    private final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
-    private final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
-    private final double CLAW_OPEN = 0.03;
-    private final double CLAW_CLOSE = 0.17;
+    public final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
+    public final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
+    public final double CLAW_OPEN = 0.03;
+    public final double CLAW_CLOSE = 0.17;
 
-    private final double KICKER_REST = 0.75;
-    private final double KICKER_FIRE = 0.45;
+    public final double KICKER_REST = 0.75;
+    public final double KICKER_FIRE = 0.45;
 
-    private final double SCORING_POWER = -1.0;
+    public final double SCORING_POWER = -1.0;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
     // If the camera is angled down, -20.0 is usually very close, 0.0 is far.
-    private final double DESIRED_TY = -18.0;
-    private final double DRIVE_GAIN = 0.03;  // Speed multiplier for distance
-    private final double TURN_GAIN  = 0.02;  // Speed multiplier for turning
-    private final double MAX_AUTO_SPEED = 0.5; // Safety cap
+    public final double DESIRED_TY = -18.0;
+    public final double DRIVE_GAIN = 0.03;  // Speed multiplier for distance
+    public final double TURN_GAIN  = 0.02;  // Speed multiplier for turning
+    public final double MAX_AUTO_SPEED = 0.5; // Safety cap
 
     // --- STATE MACHINE ---
-    private enum RobotState {
+    public enum RobotState {
         DRIVER_CONTROL,
         AUTO_ALIGN_INTAKE, // Uses Limelight (Front)
         AUTO_ALIGN_SCORE   // Uses HuskyLens (Back)
     }
-    private RobotState currentState = RobotState.DRIVER_CONTROL;
+    public RobotState currentState = RobotState.DRIVER_CONTROL;
 
     // --- GAME LOGIC ---
-    private List<List<String>> motifs = new ArrayList<>(Arrays.asList(
+    public List<List<String>> motifs = new ArrayList<>(Arrays.asList(
             new ArrayList<>(Arrays.asList("Green", "Purple", "Purple")),
             new ArrayList<>(Arrays.asList("Purple", "Green", "Purple")),
             new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"))
     ));
-    private List<String> motif = motifs.get(0);
-    private int motifIndex = 0;
+    public List<String> motif = motifs.get(0);
+    public int motifIndex = 0;
 
-    private List<IntakeSlot> slots = new ArrayList<>();
-    private int targetSlotIndex = -1;
+    public List<IntakeSlot> slots = new ArrayList<>();
+    public int targetSlotIndex = -1;
 
-    private double driveDirection = 1.0;
+    public double driveDirection = 1.0;
 
     @Override
     public void runOpMode() {
@@ -144,7 +144,6 @@ public class DualCameraTeleOp extends LinearOpMode {
             telemetry.addData("Slot 2", slots.get(1).color);
             telemetry.addData("Slot 3", slots.get(2).color);
             telemetry.addData("Mode", currentState);
-            telemetry.addData("Motif Need", motif.get(motifIndex));
             telemetry.addData("Drive Dir", driveDirection > 0 ? "FWD (Intake)" : "REV (Score)");
             telemetry.update();
         }
@@ -290,7 +289,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         }
     }
 
-    private void initLogic() {
+    public void initLogic() {
         slots.add(new IntakeSlot(1, claw1));
         slots.add(new IntakeSlot(2, claw2));
         slots.add(new IntakeSlot(3, claw3));
@@ -300,14 +299,14 @@ public class DualCameraTeleOp extends LinearOpMode {
         slots.get(2).occupied = true; slots.get(2).color = "Purple";
     }
 
-    private int getNextEmptySlot() {
+    public int getNextEmptySlot() {
         for (int i = 0; i < 3; i++) {
             if (!slots.get(i).occupied) return i;
         }
         return -1;
     }
 
-    private int getSlotWithColor(String neededColor) {
+    public int getSlotWithColor(String neededColor) {
         for (int i = 0; i < 3; i++) {
             if (slots.get(i).occupied && slots.get(i).color.equalsIgnoreCase(neededColor)) {
                 return i;
@@ -316,7 +315,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         return -1;
     }
 
-    private void updateRevolverServos() {
+    public void updateRevolverServos() {
         for (IntakeSlot slot : slots) slot.updateServo();
     }
 
@@ -324,7 +323,7 @@ public class DualCameraTeleOp extends LinearOpMode {
     //                             DRIVETRAIN
     // ==========================================================================
 
-    private void driveFieldCentric(double y, double x, double rx) {
+    public void driveFieldCentric(double y, double x, double rx) {
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
@@ -342,7 +341,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         rb.setPower((rotY + rotX - rx) / denominator);
     }
 
-    private void driveRobot(double y, double x, double rx) {
+    public void driveRobot(double y, double x, double rx) {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         lf.setPower((y + x + rx) / denominator);
         lb.setPower((y - x + rx) / denominator);
@@ -350,7 +349,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         rb.setPower((y + x - rx) / denominator);
     }
 
-    private void initHardware() {
+    public void initHardware() {
         lf = hardwareMap.get(DcMotor.class, "flDrive");
         lb = hardwareMap.get(DcMotor.class, "rlDrive");
         rf = hardwareMap.get(DcMotor.class, "frDrive");
