@@ -45,7 +45,7 @@ public class DualCameraTeleOp extends LinearOpMode {
 
     private final double KICKER_REST = 0.75;
     private final double KICKER_FIRE = 0.45;
-    private final double SCORING_POWER = -1;
+    private final double SCORING_POWER = -0.75;
 
     // --- LIMELIGHT DRIVE CONSTANTS ---
     private final double DESIRED_TY = -18.0;
@@ -314,8 +314,10 @@ public class DualCameraTeleOp extends LinearOpMode {
         double turnPower = 0;
         if (blocks.length > 0) {
             int targetX = blocks[0].x;
-            double error = 160 - targetX;
-            turnPower = error * 0.005;
+            if (blocks[0].id != 21 && blocks[0].id != 22 && blocks[0].id != 23) {
+                double error = targetX;
+                //turnPower = error * 0.005;
+            }
         }
 
         driveRobot(gamepad1.left_stick_y, gamepad1.left_stick_x, turnPower);
