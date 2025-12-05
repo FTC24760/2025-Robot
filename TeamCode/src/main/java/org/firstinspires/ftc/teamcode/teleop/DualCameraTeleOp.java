@@ -56,7 +56,8 @@ public class DualCameraTeleOp extends LinearOpMode {
     private enum RobotState {
         DRIVER_CONTROL,
         AUTO_ALIGN_INTAKE, // Uses Limelight (Front)
-        AUTO_ALIGN_SCORE   // Uses HuskyLens (Back)
+        AUTO_ALIGN_SCORE,   // Uses HuskyLens (Back)
+        AUTO_RAPID_FIRE // Shoot all 3
     }
     private RobotState currentState = RobotState.DRIVER_CONTROL;
 
@@ -122,6 +123,10 @@ public class DualCameraTeleOp extends LinearOpMode {
                         }
                     }
 
+                    if (gamepad1.left_bumper) {
+                        currentState = RobotState.AUTO_RAPID_FIRE;
+                    }
+
                     if (gamepad1.right_trigger > 0.3) {
                         imu.resetYaw();
                     }
@@ -133,6 +138,10 @@ public class DualCameraTeleOp extends LinearOpMode {
 
                 case AUTO_ALIGN_SCORE:
                     runScoreLogic();
+                    break;
+
+                case AUTO_RAPID_FIRE:
+                    runRapidFireSequence();
                     break;
             }
 
@@ -221,6 +230,7 @@ public class DualCameraTeleOp extends LinearOpMode {
             }
 
             slots.get(targetSlotIndex).isClawOpen = false;
+            updateRevolverServos();
             intakeSpinner.setPower(0.0);
             currentState = RobotState.DRIVER_CONTROL;
         }
@@ -283,6 +293,62 @@ public class DualCameraTeleOp extends LinearOpMode {
             driveDirection = 1.0;
             currentState = RobotState.DRIVER_CONTROL;
         }
+    }
+
+    // ==========================================================================
+    //                  RAPID FIRE LOGIC (Shoot All)
+    // ==========================================================================
+    private void runRapidFireSequence() {
+        // 1. Spin up Flywheels
+        flywheelL.setPower(SCORING_POWER);
+        flywheelR.setPower(SCORING_POWER);
+
+        // telemetry feedback
+        telemetry.addData("Mode", "RAPID FIRE ENGAGED");
+        telemetry.update();
+
+        // Allow spin-up time
+        sleep(5000);
+
+        // 2. Cycle through all 3 slots
+        for (int i = 0; i < 3; i++) {
+            // Check if opMode is still active so we can emergency stop if needed
+            if (!opModeIsActive()) break;
+
+            // A. Move Revolver to Score Position for this slot
+            revolverServo.setPosition(SCORE_POSITIONS[i]);
+            sleep(5000);
+
+            // B. Open the claw for this slot so the ball can leave
+            slots.get(i).isClawOpen = true;
+            updateRevolverServos();
+
+            // Wait for servo to reach position
+            sleep(400);
+
+            // C. Fire!
+            kicker.setPosition(KICKER_FIRE);
+            sleep(300); // Wait for kick
+
+            // D. Retract
+            kicker.setPosition(KICKER_REST);
+            sleep(600); // Wait for retract
+
+            // E. Logic Cleanup: Mark slot as empty
+            slots.get(i).occupied = false;
+            slots.get(i).color = "None";
+            slots.get(i).isClawOpen = false; // Prepare to close for next intake
+            updateRevolverServos();
+        }
+
+        // 3. Shutdown and Reset
+        updateRevolverServos(); // Ensure all claws are closed
+        flywheelL.setPower(0);
+        flywheelR.setPower(0);
+
+        // Reset Logic
+        driveDirection = 1.0; // Reset to intake forward
+        currentState = RobotState.DRIVER_CONTROL;
     }
 
     // ==========================================================================
