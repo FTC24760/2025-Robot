@@ -153,51 +153,67 @@ public class DualCameraTeleOp extends LinearOpMode {
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
     // ==========================================================================
+    // ==========================================================================
+    //                         INTAKE LOGIC (Limelight - Front)
+    // ==========================================================================
     private void runIntakeLogic() {
         // 1. Spin Intake Active
-        intakeSpinner.setPower(1.0); // <--- NEW: Spins 'in'
+        intakeSpinner.setPower(1.0);
+
         // 2. Servo Setup
         if (targetSlotIndex != -1)
             revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
         slots.get(targetSlotIndex).isClawOpen = true;
 
         LLResult result = limelight.getLatestResult();
-        double turnPower = 0;
-        double drivePower = 0; // <--- NEW: Forward/Back Power
+
+        // --- MODIFICATION START ---
+
+        // Default to MANUAL control (Driver inputs)
+        // If nothing is detected, these values remain active.
+        double drivePower = -gamepad1.left_stick_y;
+        double turnPower  = gamepad1.right_stick_x;
+        double strafePower = gamepad1.left_stick_x;
+
         String detectedLabel = "Unknown";
 
+        // Check if Limelight sees a target
         if (result != null && result.isValid()) {
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
             if (!detections.isEmpty()) {
+                // TARGET DETECTED: Overwrite Manual inputs with Auto Logic
                 LLResultTypes.DetectorResult largest = detections.get(0);
                 detectedLabel = largest.getClassName();
 
                 double tx = largest.getTargetXDegrees();
-                double ty = largest.getTargetYDegrees(); // <--- NEW: Vertical Angle
+                double ty = largest.getTargetYDegrees();
 
-                // Turn Logic
+                // Auto Turn (P-Controller)
                 turnPower = tx * TURN_GAIN;
 
-                // Drive Logic (Move forward until ty reaches DESIRED_TY)
-                // Usually: Far away = ty is 0 or slightly negative. Close = ty is very negative (e.g., -20).
-                // Equation: (Current - Target) * Gain
-                // Example: Current -5, Target -20. (-5 - -20) = +15. Positive power drives forward.
+                // Auto Drive (P-Controller)
                 drivePower = (ty - DESIRED_TY) * DRIVE_GAIN;
 
-                // Safety Clamp
+                // Safety Clamp for Auto Drive
                 if (drivePower > MAX_AUTO_SPEED) drivePower = MAX_AUTO_SPEED;
                 if (drivePower < -MAX_AUTO_SPEED) drivePower = -MAX_AUTO_SPEED;
+
+                // Note: We leave strafePower as manual (gamepad1.left_stick_x)
+                // so you can still adjust side-to-side while it locks on.
             }
         }
 
-        // 3. Drive Robot (Auto Y, Manual X, Auto Turn)
-        // We override the 'y' stick with our calculated drivePower
-        driveRobot(drivePower, gamepad1.left_stick_x, turnPower);
+        // 3. Drive Robot
+        // Passes either the Manual values OR the Auto values calculated above
+        driveRobot(drivePower, strafePower, turnPower);
+
+        // --- MODIFICATION END ---
 
         // 4. Capture/Exit Logic
         if (gamepad1.a || gamepad2.a) {
             slots.get(targetSlotIndex).occupied = true;
-            // Simple color logic based on label
+
+            // Color logic
             if (detectedLabel.toLowerCase().contains("green")) {
                 slots.get(targetSlotIndex).color = "Green";
             } else {
@@ -205,12 +221,12 @@ public class DualCameraTeleOp extends LinearOpMode {
             }
 
             slots.get(targetSlotIndex).isClawOpen = false;
-            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
+            intakeSpinner.setPower(0.0);
             currentState = RobotState.DRIVER_CONTROL;
         }
 
         if (gamepad1.b || gamepad2.b) {
-            intakeSpinner.setPower(0.0); // <--- IMPORTANT: Stop intake
+            intakeSpinner.setPower(0.0);
             currentState = RobotState.DRIVER_CONTROL;
         }
     }
