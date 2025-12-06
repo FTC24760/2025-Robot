@@ -56,8 +56,8 @@ public class AutoExample extends LinearOpMode {
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.54;
 
-    public final double SCORING_POWER_HIGH = -0.6;
-    public final double SCORING_POWER_LOW = -0.6;
+    public final double SCORING_POWER_HIGH = -0.54;
+    public final double SCORING_POWER_LOW = -0.54;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
