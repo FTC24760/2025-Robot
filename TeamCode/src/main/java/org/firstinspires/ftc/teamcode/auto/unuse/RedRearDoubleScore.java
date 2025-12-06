@@ -1,14 +1,14 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.unuse;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.teamcode.auto.AutoExample;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.ArrayList;
@@ -18,12 +18,12 @@ import java.util.List;
 @Disabled
 @Autonomous(name = "Red Rear double score", group = "auto")
 public class RedRearDoubleScore extends AutoExample {
-    public Follower follower;
+    /*public Follower follower;
     private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     //                          red
     private final Pose startPose = new Pose(84, 9, Math.toRadians(270));
     private final Pose scorePose = new Pose(84, 12, Math.toRadians(249.67));
-    private static final Pose finalPose = new Pose(108, 10, Math.toRadians(270));
+    private static final Pose finalPose = new Pose(108, 10, Math.toRadians(90));
     public static class Paths {
 
         public static PathChain Path1;
@@ -216,5 +216,5 @@ public class RedRearDoubleScore extends AutoExample {
                 telemetry.update();
             }
         }
-    }
+    }*/
 }

@@ -5,30 +5,28 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+@Autonomous(name = "Red Single Front /", group = "Auto")
+public class RedFrontSingleApril extends AutoExample {
 
+    public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
+    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
+    public static Pose rea = new Pose(84.000, 84.000, Math.toRadians(270));
+    public static Pose parkPose = new Pose(96, 108, Math.toRadians(90));
 
-@Autonomous(name = "Red Rear Single score", group = "auto")
-public class RedRearSingleScore extends AutoExample {
-    public Follower follower;
-    private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
-    //                          red
-    private static final Pose startPose = new Pose(96, 9, Math.toRadians(90));
-    private static final Pose scorePose = new Pose(84, 84, Math.toRadians(225));
-    private static final Pose parkPose = new Pose(96, 24, Math.toRadians(90));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
         public Paths(Follower follower) {
-            Path1 = new Path(new BezierLine(startPose, scorePose));
-            Path1.setLinearHeadingInterpolation(scorePose.getHeading(), scorePose.getHeading());
+            Path1 = new Path(new BezierLine(startPose, rea));
+            Path1.setLinearHeadingInterpolation(scorePose.getHeading(), rea.getHeading());
+
+            Path2 = new Path(new BezierLine(rea, scorePose));
+            Path2.setLinearHeadingInterpolation(rea.getHeading(), scorePose.getHeading());
 
             Path7 = new Path(new BezierLine(scorePose, parkPose));
             Path7.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
@@ -59,10 +57,27 @@ public class RedRearSingleScore extends AutoExample {
             switch (pathState) {
                 case 0:
                     follower.followPath(Paths.Path1);
-                    if (follower.getPose().getY() > 82) {
+                    if (follower.getPose().getY() < 86) {
                         setPathState(1);
                         scoringState = 0;
                         actionTimer.resetTimer();
+                    }
+                    break;
+                case 20:
+                    follower.followPath(Paths.Path2);
+                    HuskyLens.Block[] blocks = huskyLens.blocks();
+                    for (int i = 0; i < blocks.length; i++) {
+                        switch (blocks[i].id) {
+                            case 21:
+                                motif = motifs.get(0);
+                                break;
+                            case 22:
+                                motif = motifs.get(1);
+                                break;
+                            case 23:
+                                motif = motifs.get(2);
+                                break;
+                        }
                     }
                     break;
                 case 1:

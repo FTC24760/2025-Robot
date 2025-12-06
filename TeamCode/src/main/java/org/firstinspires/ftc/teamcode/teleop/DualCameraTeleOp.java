@@ -41,11 +41,12 @@ public class DualCameraTeleOp extends LinearOpMode {
     public final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
     public final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
     public final double CLAW_OPEN = 0.03;
-    public final double CLAW_CLOSE = 0.23;
+    public final double CLAW_CLOSE = 0.20;
 
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.45;
-    public final double SCORING_POWER = -0.6;
+    public final double SCORING_POWER = -0.5; // -0.6 usually
+    public final double SCORING_POWER_LO = -0.5;
 
     // --- LIMELIGHT DRIVE CONSTANTS ---
     public final double DESIRED_TY = -18.0;
@@ -95,7 +96,7 @@ public class DualCameraTeleOp extends LinearOpMode {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double rx = gamepad1.right_stick_x;
-            if (gamepad1.left_trigger > 0.3) {
+            if (gamepad2.left_trigger > 0.3) {
                 for (int i = 0; i < 3; i++) {
                     slots.get(i).color = "None";
                     slots.get(i).occupied = false;
@@ -111,6 +112,10 @@ public class DualCameraTeleOp extends LinearOpMode {
                     // Single Intake
                     if (gamepad1.right_bumper || gamepad2.right_bumper) {
                         targetSlotIndex = getNextEmptySlot();
+                        if (targetSlotIndex != -1) {
+                            revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
+                            slots.get(targetSlotIndex).isClawOpen = true;
+                        }
                         if (targetSlotIndex != -1) {
                             driveDirection = 1.0;
                             currentState = RobotState.AUTO_ALIGN_INTAKE;
@@ -140,7 +145,7 @@ public class DualCameraTeleOp extends LinearOpMode {
                         }
                     }
 
-                    if (gamepad1.left_bumper) currentState = RobotState.AUTO_RAPID_FIRE;
+                    if (gamepad1.left_bumper || gamepad2.left_bumper) currentState = RobotState.AUTO_RAPID_FIRE;
                     if (gamepad1.right_trigger > 0.3) imu.resetYaw();
                     break;
 
@@ -165,6 +170,9 @@ public class DualCameraTeleOp extends LinearOpMode {
             updateRevolverServos();
 
             // 4. TELEMETRY
+            telemetry.addData("Slot 1", slots.get(0).color);
+            telemetry.addData("Slot 2", slots.get(1).color);
+            telemetry.addData("Slot 3", slots.get(2).color);
             telemetry.addData("Mode", currentState);
             telemetry.addData("Batch Timer", batchTimer.milliseconds());
             telemetry.addData("Slots", slots.get(0).color + ", " + slots.get(1).color + ", " + slots.get(2).color);
@@ -266,10 +274,6 @@ public class DualCameraTeleOp extends LinearOpMode {
 
     private void runIntakeLogic() {
         intakeSpinner.setPower(1.0);
-        if (targetSlotIndex != -1) {
-            revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
-            slots.get(targetSlotIndex).isClawOpen = true;
-        }
 
         LLResult result = limelight.getLatestResult();
         double drivePower = -gamepad1.left_stick_y;
@@ -296,15 +300,31 @@ public class DualCameraTeleOp extends LinearOpMode {
         driveRobot(drivePower, strafePower, turnPower);
 
         if (gamepad1.a || gamepad2.a) {
-            slots.get(targetSlotIndex).occupied = true;
-            if (detectedLabel.toLowerCase().contains("green")) slots.get(targetSlotIndex).color = "Green";
-            else slots.get(targetSlotIndex).color = "Purple";
-            intakeSpinner.setPower(0.0);
-            sleep(300);
-
-            slots.get(targetSlotIndex).isClawOpen = false;
+                slots.get(targetSlotIndex).occupied = true;
+                if (detectedLabel.toLowerCase().contains("green"))
+                    slots.get(targetSlotIndex).color = "Green";
+                else slots.get(targetSlotIndex).color = "Purple";
+                slots.get(targetSlotIndex).isClawOpen = false;
+        }
+        if (gamepad1.y || gamepad2.y) {
+                slots.get(targetSlotIndex).occupied = false;
+                slots.get(targetSlotIndex).color = "None";
+                slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
-            currentState = RobotState.DRIVER_CONTROL;
+        }
+
+        if (gamepad1.x || gamepad2.x) {
+            if (getNextEmptySlot() >= 0) {
+                targetSlotIndex = getNextEmptySlot();
+                if (targetSlotIndex != -1) {
+                    revolverServo.setPosition(INTAKE_POSITIONS[targetSlotIndex]);
+                    slots.get(targetSlotIndex).isClawOpen = true;
+                }
+            }
+            else {
+                intakeSpinner.setPower(0.0);
+                currentState = RobotState.DRIVER_CONTROL;
+            }
         }
         if (gamepad1.b || gamepad2.b) {
             intakeSpinner.setPower(0.0);
@@ -330,7 +350,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         if (gamepad1.a || gamepad2.a) {
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
-            sleep(800);
+            sleep(2000);
             kicker.setPosition(KICKER_FIRE);
             sleep(300);
             kicker.setPosition(KICKER_REST);
@@ -358,7 +378,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         flywheelR.setPower(SCORING_POWER);
         telemetry.addData("Mode", "RAPID FIRE");
         telemetry.update();
-        sleep(1500);
+        sleep(3000);
 
         for (int i = 0; i < 3; i++) {
             if (!opModeIsActive()) break;

@@ -12,10 +12,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Autonomous(name = "Red Front Hide", group = "auto")
 public class RedFrontHideInACornerSimulator extends AutoExample {
     public static class Paths {
-        public static Pose startPose = new Pose(122, 122, Math.toRadians(37));
+        public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
         public static Pose endPose = new Pose(84, 108, Math.toRadians(90));
-        public static Path path;
 
+        public static Path path;
         public Paths(Follower follower) {
             path = new Path(new BezierLine(startPose, endPose));
             path.setLinearHeadingInterpolation(startPose.getHeading(), endPose.getHeading());

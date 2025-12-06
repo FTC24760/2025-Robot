@@ -28,6 +28,11 @@ import java.util.List;
 
 @Autonomous(name = "Rear double score", group = "auto")
 public class AutoExample extends LinearOpMode {
+    public List<List<String>> motifs = new ArrayList<>(Arrays.asList(
+            new ArrayList<>(Arrays.asList("Green", "Purple", "Purple")),
+            new ArrayList<>(Arrays.asList("Purple", "Green", "Purple")),
+            new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"))));
+
     Follower follower;
     public DcMotor lf, lb, rf, rb;
     public DcMotor flywheelL, flywheelR;
@@ -207,11 +212,14 @@ public class AutoExample extends LinearOpMode {
         slots.add(new IntakeSlot(3, claw3));
 
         slots.get(0).occupied = true;
-        slots.get(0).color = "Purple";
+        slots.get(0).color = "Green";
         slots.get(1).occupied = true;
         slots.get(1).color = "Purple";
         slots.get(2).occupied = true;
-        slots.get(2).color = "Green";
+        slots.get(2).color = "Purple";
+        for (int i = 0; i < 3; i++) {
+            slots.get(i).isClawOpen = false;
+        }
     }
 
     public int getNextEmptySlot() {

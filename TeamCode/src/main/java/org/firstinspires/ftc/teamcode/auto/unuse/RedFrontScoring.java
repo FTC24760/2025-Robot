@@ -1,38 +1,22 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.unuse;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.auto.AutoExample;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+@Disabled
 @Autonomous(name = "Red Front Double", group = "Auto")
 public class RedFrontScoring extends AutoExample {
-    public static Pose startPose = new Pose(122, 122.000, Math.toRadians(225));
+    /*public static Pose startPose = new Pose(122, 122.000, Math.toRadians(225));
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
-    public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
+    public static Pose parkPose = new Pose(96, 108, Math.toRadians(90));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
@@ -55,8 +39,8 @@ public class RedFrontScoring extends AutoExample {
             Path6 = new Path(new BezierLine(new Pose(118.000, 84.000), new Pose(84.000, 84.000)));
             Path6.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians((225)));
 
-            Path7 = new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(84.000, 60.000)));
-            Path7.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(315));
+            Path7 = new Path(new BezierLine(new Pose(84.000, 84.000), parkPose));
+            Path7.setLinearHeadingInterpolation(Math.toRadians(225), parkPose.getHeading());
         }
     }
     public void runOpMode() {
@@ -172,5 +156,5 @@ public class RedFrontScoring extends AutoExample {
             telemetry.addData("heading", follower.getPose().getHeading());
             telemetry.update();
         }
-    }
+    }*/
 }
