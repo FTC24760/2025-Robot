@@ -56,8 +56,8 @@ public class AutoExample extends LinearOpMode {
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.54;
 
-    public final double SCORING_POWER_HIGH = -0.67;
-    public final double SCORING_POWER_LOW = -0.67;
+    public final double SCORING_POWER_HIGH = -0.75;
+    public final double SCORING_POWER_LOW = -0.75;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
@@ -152,29 +152,31 @@ public class AutoExample extends LinearOpMode {
                 flywheelL.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
                 flywheelR.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
                 targetSlotIndex = getSlotWithColor(motif.get(motifIndex));
-                revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
-                slots.get(targetSlotIndex).isClawOpen = true;
-                updateRevolverServos();
-                if (actionTimer.getElapsedTimeSeconds() > 0.8) {
-                    scoringState = 0;
-                    actionTimer.resetTimer();
+                if (targetSlotIndex < 0) {
+                    scoringState = -1;
+                    flywheelL.setPower(0);
+                    flywheelR.setPower(0);
+                }
+                else {
+                    revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
+                    slots.get(targetSlotIndex).isClawOpen = true;
+                    updateRevolverServos();
+                    if (actionTimer.getElapsedTimeSeconds() > 1.2) {
+                        scoringState = 1;
+                        actionTimer.resetTimer();
+                    }
                 }
                 break;
             case 1:
                 kicker.setPosition(KICKER_FIRE);
-                if (actionTimer.getElapsedTimeSeconds() > 0.3) {
-                    scoringState = 1;
+                if (actionTimer.getElapsedTimeSeconds() > 0.5) {
+                    scoringState = 2;
                     actionTimer.resetTimer();
                 }
             case 2:
                 kicker.setPosition(KICKER_REST);
-                if (actionTimer.getElapsedTimeSeconds() > 1.2) {
+                if (actionTimer.getElapsedTimeSeconds() > 0.8) {
                     scoringState = 0;
-                    if (allSlotsEmpty()) {
-                        scoringState = -1;
-                        flywheelL.setPower(0);
-                        flywheelR.setPower(0);
-                    }
                     actionTimer.resetTimer();
 
                     slots.get(targetSlotIndex).occupied = false;

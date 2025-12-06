@@ -45,7 +45,7 @@ public class RedFrontScoringSingle extends AutoExample {
             switch (pathState) {
                 case 0:
                     follower.followPath(Paths.Path1);
-                    if (follower.getPose().getY() < 85) {
+                    if (follower.getPose().getY() < 86) {
                         setPathState(1);
                         scoringState = 0;
                         actionTimer.resetTimer();
