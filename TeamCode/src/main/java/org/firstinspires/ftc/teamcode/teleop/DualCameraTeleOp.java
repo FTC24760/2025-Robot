@@ -41,11 +41,11 @@ public class DualCameraTeleOp extends LinearOpMode {
     public final double[] INTAKE_POSITIONS = {0.62, 0.245, 1.0};
     public final double[] SCORE_POSITIONS  = {0.075, 0.805, 0.45};
     public final double CLAW_OPEN = 0.03;
-    public final double CLAW_CLOSE = 0.17;
+    public final double CLAW_CLOSE = 0.23;
 
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.45;
-    public final double SCORING_POWER = -1;
+    public final double SCORING_POWER = -0.6;
 
     // --- LIMELIGHT DRIVE CONSTANTS ---
     public final double DESIRED_TY = -18.0;
@@ -299,10 +299,11 @@ public class DualCameraTeleOp extends LinearOpMode {
             slots.get(targetSlotIndex).occupied = true;
             if (detectedLabel.toLowerCase().contains("green")) slots.get(targetSlotIndex).color = "Green";
             else slots.get(targetSlotIndex).color = "Purple";
+            intakeSpinner.setPower(0.0);
+            sleep(300);
 
             slots.get(targetSlotIndex).isClawOpen = false;
             updateRevolverServos();
-            intakeSpinner.setPower(0.0);
             currentState = RobotState.DRIVER_CONTROL;
         }
         if (gamepad1.b || gamepad2.b) {
@@ -320,8 +321,8 @@ public class DualCameraTeleOp extends LinearOpMode {
         double turnPower = 0;
         if (blocks.length > 0) {
             int targetX = blocks[0].x;
-            double error = 160 - targetX;
-            turnPower = error * 0.005;
+            //double error = 160 - targetX;
+            //turnPower = error * 0.005;
         }
 
         driveRobot(gamepad1.left_stick_y, gamepad1.left_stick_x, turnPower);

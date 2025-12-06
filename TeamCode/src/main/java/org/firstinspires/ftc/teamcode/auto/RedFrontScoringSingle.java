@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Red Single Front", group = "Auto")
+@Autonomous(name = "THE ONLY WORKING AUTO - Red Single Front", group = "Auto")
 public class RedFrontScoringSingle extends AutoExample {
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
     public static Pose parkPose = new Pose(96, 108, Math.toRadians(90));
@@ -38,6 +38,11 @@ public class RedFrontScoringSingle extends AutoExample {
         follower.setStartingPose(startPose);
         opmodeTimer.resetTimer();
         setPathState(0);
+
+        for (int i = 0; i < 3; i++) {
+            slots.get(i).isClawOpen = false;
+        }
+        updateRevolverServos();
 
         while (opModeIsActive()) {
             // These loop the movements of the robot, these must be called continuously in order to work
@@ -68,7 +73,8 @@ public class RedFrontScoringSingle extends AutoExample {
                     }
                     break;
                 case 8:
-                    follower.holdPoint(parkPose);
+                    //follower.holdPoint(parkPose);
+                    break;
             }
             updateRevolverServos();
             //follower.setPose(getRobotPoseFromCamera());
