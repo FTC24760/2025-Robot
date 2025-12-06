@@ -95,7 +95,13 @@ public class DualCameraTeleOp extends LinearOpMode {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double rx = gamepad1.right_stick_x;
-
+            if (gamepad1.left_trigger > 0.3) {
+                for (int i = 0; i < 3; i++) {
+                    slots.get(i).color = "None";
+                    slots.get(i).occupied = false;
+                    slots.get(i).isClawOpen = false;
+                }
+            }
             // 2. STATE HANDLING
             switch (currentState) {
                 case DRIVER_CONTROL:
