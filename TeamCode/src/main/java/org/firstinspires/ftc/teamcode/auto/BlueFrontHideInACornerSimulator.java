@@ -1,19 +1,39 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
+
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Autonomous(name = "Blue Front Hide", group = "auto")
 public class BlueFrontHideInACornerSimulator extends AutoExample {
+    Paths paths = new Paths(follower);
     public static class Paths {
-        public static Pose startPose = new Pose(122, 122, Math.toRadians(37));
-        public static Pose endPose = new Pose(84, 132, Math.toRadians(0));
+        public static Pose startPose = new Pose(22, 122, Math.toRadians(143));
+        public static Pose endPose = new Pose(60, 108, Math.toRadians(180-90));
         public static Path path;
 
         public Paths(Follower follower) {
@@ -51,7 +71,7 @@ public class BlueFrontHideInACornerSimulator extends AutoExample {
 
             }
             updateRevolverServos();
-            follower.setPose(getRobotPoseFromCamera());
+            //follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
             telemetry.addData("path state", pathState);
             telemetry.addData("x", follower.getPose().getX());

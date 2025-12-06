@@ -9,36 +9,29 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+@Autonomous(name = "Red Single Double", group = "Auto")
+public class BlueFrontScoringSingle extends AutoExample {
+    public static Pose scorePose = new Pose(144-84.000, 84.000, Math.toRadians(180-225));
+    public static Pose parkPose = new Pose(144-84, 108, Math.toRadians(180-90));
+    public static class Paths {
+        public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
-@Autonomous(name = "Red Rear Single score", group = "auto")
-public class RedRearSingleScore extends AutoExample {
-    public Follower follower;
-    private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
-    //                          red
-    private final Pose startPose = new Pose(96, 9, Math.toRadians(90));
-    private final Pose scorePose = new Pose(84, 84, Math.toRadians(45));
-    private final Pose finalPose = new Pose(108, 10, Math.toRadians(270));
-    private Pose currentPose;
-    private Path toLaunchZone, toPark;
-    public void buildPaths() {
-        toLaunchZone = new Path(new BezierLine(startPose, scorePose));
-        toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-        toPark = new Path(new BezierLine(scorePose, finalPose));
-        toPark.setLinearHeadingInterpolation(scorePose.getHeading(), finalPose.getHeading());
+        public Paths(Follower follower) {
+            Path1 = new Path(new BezierLine(new Pose(144-122.000, 122.000), scorePose));
+            Path1.setLinearHeadingInterpolation(Math.toRadians(180-225), scorePose.getHeading());
+
+            Path7 = new Path(new BezierLine(scorePose, parkPose));
+            Path7.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
+        }
     }
-
     public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-
+        Paths paths = new Paths(follower);
         waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
-        buildPaths();
         follower.setStartingPose(new Pose());
         opmodeTimer.resetTimer();
         setPathState(0);
@@ -48,7 +41,7 @@ public class RedRearSingleScore extends AutoExample {
             follower.update();
             switch (pathState) {
                 case 0:
-                    follower.followPath(toLaunchZone);
+                    follower.followPath(Paths.Path1);
                     if (!follower.isBusy()) {
                         setPathState(1);
                         scoringState = 0;
@@ -56,24 +49,26 @@ public class RedRearSingleScore extends AutoExample {
                     }
                     break;
                 case 1:
-                    runScoreLogic(true);
+                    follower.holdPoint(scorePose);
+                    runScoreLogic(false);
                     if (scoringState == -1) {
-                        setPathState(2);
+                        setPathState(7);
+                        targetSlotIndex = getNextEmptySlot();
+                        startIntake();
                     }
                     break;
-                case 2:
-                    follower.followPath(toLaunchZone);
-                case 3:
-                    runIntakeLogic();
-                    if (false) {
-                        //currentPose =
-                        setPathState(4);
-                        toLaunchZone = new Path(new BezierLine(startPose, scorePose));
-                        toLaunchZone.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+                case 7:
+                    follower.followPath(Paths.Path7);
+                    if (!follower.isBusy()) {
+                        setPathState(8);
+                        actionTimer.resetTimer();
                     }
                     break;
+                case 8:
+                    follower.holdPoint(parkPose);
             }
-            follower.setPose(getRobotPoseFromCamera());
+            updateRevolverServos();
+            //follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
             telemetry.addData("path state", pathState);
             telemetry.addData("x", follower.getPose().getX());

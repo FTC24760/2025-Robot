@@ -28,6 +28,7 @@ import java.util.List;
 
 @Autonomous(name = "Rear double score", group = "auto")
 public class AutoExample extends LinearOpMode {
+    Follower follower;
     public DcMotor lf, lb, rf, rb;
     public DcMotor flywheelL, flywheelR;
     public Servo revolverServo;
@@ -72,7 +73,7 @@ public class AutoExample extends LinearOpMode {
     public int targetSlotIndex = -1;
     public double driveDirection = 1.0;
     // Pedropathing variables;
-    public Follower follower;
+
     public Timer pathTimer, actionTimer, opmodeTimer;
 
     public int pathState;
@@ -82,12 +83,7 @@ public class AutoExample extends LinearOpMode {
     // idk
     public Pose currentPose;
     public Path toLaunchZone;
-    public Pose getRobotPoseFromCamera() {
-        //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
-        //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
-        //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
-        return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-    }
+
 
     // ==========================================================================
     //                         INTAKE LOGIC (Limelight - Front)
@@ -311,5 +307,12 @@ public class AutoExample extends LinearOpMode {
         public void updateServo() {
             clawServo.setPosition(isClawOpen ? CLAW_OPEN : CLAW_CLOSE);
         }
+    }
+    public Pose getRobotPoseFromCamera() {
+        //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
+        //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
+        //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
+        //return new follower.getPose();
+        return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
 }

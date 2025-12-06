@@ -9,31 +9,31 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Red Single Double", group = "Auto")
+@Autonomous(name = "Red Single Front", group = "Auto")
 public class RedFrontScoringSingle extends AutoExample {
-
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
-    public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
+    public static Pose parkPose = new Pose(84, 108, Math.toRadians(90));
+    public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
         public Paths(Follower follower) {
-            Path1 = new Path(new BezierLine(new Pose(122.000, 122.000), new Pose(84.000, 84.000)));
-            Path1.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(225));
+            Path1 = new Path(new BezierLine(startPose, scorePose));
+            Path1.setLinearHeadingInterpolation(scorePose.getHeading(), scorePose.getHeading());
 
-            Path7 = new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(84.000, 60.000)));
-            Path7.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(90));
+            Path7 = new Path(new BezierLine(scorePose, parkPose));
+            Path7.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
         }
     }
     public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
-
+        Paths paths = new Paths(follower);
         waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose());
+        follower.setStartingPose(startPose);
         opmodeTimer.resetTimer();
         setPathState(0);
 
@@ -43,7 +43,7 @@ public class RedFrontScoringSingle extends AutoExample {
             switch (pathState) {
                 case 0:
                     follower.followPath(Paths.Path1);
-                    if (!follower.isBusy()) {
+                    if (follower.getPose().getY() < 85) {
                         setPathState(1);
                         scoringState = 0;
                         actionTimer.resetTimer();
@@ -69,7 +69,7 @@ public class RedFrontScoringSingle extends AutoExample {
                     follower.holdPoint(parkPose);
             }
             updateRevolverServos();
-            follower.setPose(getRobotPoseFromCamera());
+            //follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
             telemetry.addData("path state", pathState);
             telemetry.addData("x", follower.getPose().getX());

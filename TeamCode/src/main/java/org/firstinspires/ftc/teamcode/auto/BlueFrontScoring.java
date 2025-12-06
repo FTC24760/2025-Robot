@@ -1,62 +1,42 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.FTCCoordinates;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@Autonomous(name = "Red Front Double", group = "Auto")
-public class RedFrontScoring extends AutoExample {
-    public static Pose startPose = new Pose(122, 122.000, Math.toRadians(225));
+@Autonomous(name = "Blue Front Double", group = "Auto")
+public class BlueFrontScoring extends AutoExample {
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
     public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
         public Paths(Follower follower) {
-            Path1 = new Path(new BezierLine(startPose, new Pose(84.000, 84.000)));
-            Path1.setLinearHeadingInterpolation(startPose.getHeading(), Math.toRadians(225));
+            Path1 = new Path(new BezierLine(new Pose(144-122.000, 122.000), new Pose(144-84.000, 84.000)));
+            Path1.setLinearHeadingInterpolation(Math.toRadians(180-225), Math.toRadians(180-225));
 
-            Path2 = new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(102.000, 84.000)));
-            Path2.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(0));
+            Path2 = new Path(new BezierLine(new Pose(144-84.000, 84.000), new Pose(144-102.000, 84.000)));
+            Path2.setLinearHeadingInterpolation(Math.toRadians(180-225), Math.toRadians(180-0));
 
-            Path3 = new Path(new BezierLine(new Pose(102.000, 84.000), new Pose(108.000, 84.000)));
-            Path3.setConstantHeadingInterpolation(Math.toRadians(0));
+            Path3 = new Path(new BezierLine(new Pose(144-102.000, 84.000), new Pose(144-108.000, 84.000)));
+            Path3.setConstantHeadingInterpolation(Math.toRadians(180-0));
 
-            Path4 = new Path(new BezierLine(new Pose(108.000, 84.000), new Pose(112.000, 84.000)));
-            Path4.setConstantHeadingInterpolation(Math.toRadians(0));
+            Path4 = new Path(new BezierLine(new Pose(144-108.000, 84.000), new Pose(144-112.000, 84.000)));
+            Path4.setConstantHeadingInterpolation(Math.toRadians(180-0));
 
-            Path5 = new Path(new BezierLine(new Pose(112.000, 84.000), new Pose(118.000, 84.000)));
-            Path5.setConstantHeadingInterpolation(Math.toRadians(0));
+            Path5 = new Path(new BezierLine(new Pose(144-112.000, 84.000), new Pose(144-118.000, 84.000)));
+            Path5.setConstantHeadingInterpolation(Math.toRadians(180-0));
 
-            Path6 = new Path(new BezierLine(new Pose(118.000, 84.000), new Pose(84.000, 84.000)));
-            Path6.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians((225)));
+            Path6 = new Path(new BezierLine(new Pose(144-118.000, 84.000), new Pose(144-84.000, 84.000)));
+            Path6.setLinearHeadingInterpolation(Math.toRadians(180-0), Math.toRadians(180-225));
 
-            Path7 = new Path(new BezierLine(new Pose(84.000, 84.000), new Pose(84.000, 60.000)));
-            Path7.setLinearHeadingInterpolation(Math.toRadians(225), Math.toRadians(315));
+            Path7 = new Path(new BezierLine(new Pose(144-84.000, 84.000), new Pose(144-84.000, 60.000)));
+            Path7.setLinearHeadingInterpolation(Math.toRadians(180-225), Math.toRadians(180-315));
         }
     }
     public void runOpMode() {
@@ -67,7 +47,7 @@ public class RedFrontScoring extends AutoExample {
         waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(new Pose());
         opmodeTimer.resetTimer();
         setPathState(0);
 

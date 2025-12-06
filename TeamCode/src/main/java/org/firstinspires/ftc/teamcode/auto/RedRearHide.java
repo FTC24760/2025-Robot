@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Autonomous(name = "Red Rear Hide", group = "auto")
 public class RedRearHide extends AutoExample {
+    public Follower follower;
     private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     //                          red
     private final Pose startPose = new Pose(96, 9, Math.toRadians(90));

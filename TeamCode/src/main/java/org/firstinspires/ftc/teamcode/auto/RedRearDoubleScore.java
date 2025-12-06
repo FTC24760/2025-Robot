@@ -16,6 +16,7 @@ import java.util.List;
 
 @Autonomous(name = "Red Rear double score", group = "auto")
 public class RedRearDoubleScore extends AutoExample {
+    public Follower follower;
     private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     //                          red
     private final Pose startPose = new Pose(84, 9, Math.toRadians(270));

@@ -11,11 +11,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Front Hide", group = "auto")
 public class RedFrontHideInACornerSimulator extends AutoExample {
-    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
-    public static Pose parkPose = new Pose(84, 60, Math.toRadians(315));
     public static class Paths {
         public static Pose startPose = new Pose(122, 122, Math.toRadians(37));
-        public static Pose endPose = new Pose(84, 132, Math.toRadians(0));
+        public static Pose endPose = new Pose(84, 108, Math.toRadians(90));
         public static Path path;
 
         public Paths(Follower follower) {
@@ -31,10 +29,10 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
         waitForStart();
         initHardware();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose());
+        follower.setStartingPose(Paths.startPose);
         opmodeTimer.resetTimer();
         setPathState(0);
-
+        Paths paths = new Paths(follower);
         while (opModeIsActive()) {
             // These loop the movements of the robot, these must be called continuously in order to work
             follower.update();
@@ -53,7 +51,7 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
 
             }
             updateRevolverServos();
-            follower.setPose(getRobotPoseFromCamera());
+            //follower.setPose(getRobotPoseFromCamera());
             // Feedback to Driver Hub for debugging
             telemetry.addData("path state", pathState);
             telemetry.addData("x", follower.getPose().getX());
