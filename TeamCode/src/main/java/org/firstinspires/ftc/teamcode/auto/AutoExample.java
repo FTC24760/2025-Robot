@@ -56,8 +56,8 @@ public class AutoExample extends LinearOpMode {
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.54;
 
-    public final double SCORING_POWER_HIGH = -0.75;
-    public final double SCORING_POWER_LOW = -0.75;
+    public final double SCORING_POWER_HIGH = -0.6;
+    public final double SCORING_POWER_LOW = -0.6;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
     // Adjust DESIRED_TY based on how close you want to be to the ball.
@@ -173,6 +173,7 @@ public class AutoExample extends LinearOpMode {
                     scoringState = 2;
                     actionTimer.resetTimer();
                 }
+                break;
             case 2:
                 kicker.setPosition(KICKER_REST);
                 if (actionTimer.getElapsedTimeSeconds() > 0.8) {
@@ -180,10 +181,13 @@ public class AutoExample extends LinearOpMode {
                     actionTimer.resetTimer();
 
                     slots.get(targetSlotIndex).occupied = false;
+                    slots.get(targetSlotIndex).isClawOpen = false;
+                    updateRevolverServos();
                     slots.get(targetSlotIndex).color = "None";
                     motifIndex++;
                     motifIndex = motifIndex % motif.size();
                 }
+                break;
         }
     }
     public void startIntake() {
@@ -291,7 +295,7 @@ public class AutoExample extends LinearOpMode {
     }
     class IntakeSlot {
         public final double CLAW_OPEN = 0.0;
-        public final double CLAW_CLOSE = 0.17;
+        public final double CLAW_CLOSE = 0.23;
         int id;
         boolean occupied;
         String color;
