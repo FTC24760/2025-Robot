@@ -20,7 +20,6 @@ public class RedRearHide extends AutoExample {
     //                          red
     private final Pose startPose = new Pose(96, 9, Math.toRadians(90));
     private final Pose finalPose = new Pose(108, 10, Math.toRadians(270));
-    private Pose currentPose;
     private Path toPark;
     public void buildPaths() {
 

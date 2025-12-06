@@ -7,6 +7,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Disabled
 @Autonomous(name = "Red Rear double score", group = "auto")
 public class RedRearDoubleScore extends AutoExample {
     public Follower follower;
