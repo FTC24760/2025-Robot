@@ -48,6 +48,7 @@ public class BlueFrontHideInACornerSimulator extends AutoExample {
 
         waitForStart();
         initHardware();
+        initLogic();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose());
         opmodeTimer.resetTimer();

@@ -201,11 +201,11 @@ public class AutoExample extends LinearOpMode {
         slots.add(new IntakeSlot(3, claw3));
 
         slots.get(0).occupied = true;
-        slots.get(0).color = "Green";
+        slots.get(0).color = "Purple";
         slots.get(1).occupied = true;
         slots.get(1).color = "Purple";
         slots.get(2).occupied = true;
-        slots.get(2).color = "Purple";
+        slots.get(2).color = "Green";
     }
 
     public int getNextEmptySlot() {

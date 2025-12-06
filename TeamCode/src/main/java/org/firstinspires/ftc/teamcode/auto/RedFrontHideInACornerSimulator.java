@@ -24,10 +24,12 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
     public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
+        actionTimer = new Timer();
 
         waitForStart();
         initHardware();
+        initLogic();
+        actionTimer.resetTimer();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(Paths.startPose);
         opmodeTimer.resetTimer();

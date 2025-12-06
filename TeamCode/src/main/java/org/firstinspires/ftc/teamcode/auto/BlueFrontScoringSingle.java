@@ -27,10 +27,11 @@ public class BlueFrontScoringSingle extends AutoExample {
     public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
+        actionTimer = new Timer();
         Paths paths = new Paths(follower);
         waitForStart();
         initHardware();
+        initLogic();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose());
         opmodeTimer.resetTimer();
