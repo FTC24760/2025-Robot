@@ -9,12 +9,19 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Blue Single Score", group = "Auto")
-public class BlueFrontScoringSingle extends AutoExample {
-   public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-225));
-    public static Pose scorePose = new Pose(144-84.000, 84.000, Math.toRadians(180-225));
-    public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+
+@Autonomous(name = "Blue Rear Single score", group = "auto")
+public class BlueRearSingleScore extends AutoExample {
+    public Follower follower;
+    private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
+    //                          red
+    private static final Pose startPose = new Pose(144-96, 9, Math.toRadians(180-270));
+    private static final Pose scorePose = new Pose(144-84, 84, Math.toRadians(180-225));
+    private static final Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
@@ -31,6 +38,8 @@ public class BlueFrontScoringSingle extends AutoExample {
         opmodeTimer = new Timer();
         actionTimer = new Timer();
         Paths paths = new Paths(follower);
+        telemetry.addData("Direction", "Intake Back");
+        telemetry.update();
         waitForStart();
         initHardware();
         initLogic();
@@ -51,8 +60,7 @@ public class BlueFrontScoringSingle extends AutoExample {
             switch (pathState) {
                 case 0:
                     follower.followPath(Paths.Path1);
-                    flywheelL.setPower(SCORING_POWER_HIGH);
-                    if (follower.getPose().getY() < 86) {
+                    if (follower.getPose().getY() > 82) {
                         setPathState(1);
                         scoringState = 0;
                         actionTimer.resetTimer();
@@ -64,6 +72,7 @@ public class BlueFrontScoringSingle extends AutoExample {
                     if (scoringState == -1) {
                         setPathState(7);
                         targetSlotIndex = getNextEmptySlot();
+                        startIntake();
                     }
                     break;
                 case 7:

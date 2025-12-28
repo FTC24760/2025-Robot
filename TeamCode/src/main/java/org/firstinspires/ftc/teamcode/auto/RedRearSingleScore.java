@@ -20,9 +20,9 @@ public class RedRearSingleScore extends AutoExample {
     public Follower follower;
     private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     //                          red
-    private static final Pose startPose = new Pose(96, 9, Math.toRadians(90));
+    private static final Pose startPose = new Pose(96, 9, Math.toRadians(270));
     private static final Pose scorePose = new Pose(84, 84, Math.toRadians(225));
-    private static final Pose parkPose = new Pose(96, 24, Math.toRadians(90));
+    private static final Pose parkPose = new Pose(96, 60, Math.toRadians(90));
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
@@ -39,6 +39,8 @@ public class RedRearSingleScore extends AutoExample {
         opmodeTimer = new Timer();
         actionTimer = new Timer();
         Paths paths = new Paths(follower);
+        telemetry.addData("Direction", "Intake Back");
+        telemetry.update();
         waitForStart();
         initHardware();
         initLogic();

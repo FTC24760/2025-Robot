@@ -350,7 +350,7 @@ public class DualCameraTeleOp extends LinearOpMode {
         if (gamepad1.a || gamepad2.a) {
             slots.get(targetSlotIndex).isClawOpen = true;
             updateRevolverServos();
-            sleep(2000);
+            sleep(500);
             kicker.setPosition(KICKER_FIRE);
             sleep(300);
             kicker.setPosition(KICKER_REST);

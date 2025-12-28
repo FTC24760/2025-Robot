@@ -16,7 +16,7 @@ public class RedFrontSingleApril extends AutoExample {
     public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
     public static Pose rea = new Pose(84.000, 84.000, Math.toRadians(270));
-    public static Pose parkPose = new Pose(96, 108, Math.toRadians(90));
+    public static Pose parkPose = new Pose(96, 72, Math.toRadians(90));
 
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;

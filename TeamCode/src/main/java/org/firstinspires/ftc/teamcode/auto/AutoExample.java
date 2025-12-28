@@ -61,7 +61,7 @@ public class AutoExample extends LinearOpMode {
     public final double KICKER_REST = 0.75;
     public final double KICKER_FIRE = 0.54;
 
-    public final double SCORING_POWER_HIGH = -0.54;
+    public final double SCORING_POWER_HIGH = -0.51;
     public final double SCORING_POWER_LOW = -0.54;
 
     // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
@@ -166,7 +166,7 @@ public class AutoExample extends LinearOpMode {
                     revolverServo.setPosition(SCORE_POSITIONS[targetSlotIndex]);
                     slots.get(targetSlotIndex).isClawOpen = true;
                     updateRevolverServos();
-                    if (actionTimer.getElapsedTimeSeconds() > 1.2) {
+                    if (actionTimer.getElapsedTimeSeconds() > 3) {
                         scoringState = 1;
                         actionTimer.resetTimer();
                     }
@@ -301,13 +301,13 @@ public class AutoExample extends LinearOpMode {
         
         
     }
-    class IntakeSlot {
+    public class IntakeSlot {
         public final double CLAW_OPEN = 0.0;
         public final double CLAW_CLOSE = 0.23;
         int id;
         boolean occupied;
         String color;
-        boolean isClawOpen;
+        public boolean isClawOpen;
         Servo clawServo;
 
         public IntakeSlot(int id, Servo servo) {

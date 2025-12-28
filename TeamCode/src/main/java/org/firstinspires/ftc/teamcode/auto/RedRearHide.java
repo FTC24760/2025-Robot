@@ -19,7 +19,7 @@ public class RedRearHide extends AutoExample {
     private List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
     //                          red
     private final Pose startPose = new Pose(96, 9, Math.toRadians(90));
-    private final Pose finalPose = new Pose(108, 10, Math.toRadians(90));
+    private final Pose finalPose = new Pose(96, 24, Math.toRadians(90));
     private Path toPark;
     public void buildPaths() {
 

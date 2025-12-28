@@ -30,12 +30,11 @@ import java.util.List;
 
 @Autonomous(name = "Blue Front Hide", group = "auto")
 public class BlueFrontHideInACornerSimulator extends AutoExample {
-    Paths paths = new Paths(follower);
-    public static class Paths {
-        public static Pose startPose = new Pose(22, 122, Math.toRadians(143));
-        public static Pose endPose = new Pose(60, 108, Math.toRadians(180-90));
-        public static Path path;
+   public static class Paths {
+        public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-225));
+        public static Pose endPose = new Pose(144-96, 132, Math.toRadians(180-90));
 
+        public static Path path;
         public Paths(Follower follower) {
             path = new Path(new BezierLine(startPose, endPose));
             path.setLinearHeadingInterpolation(startPose.getHeading(), endPose.getHeading());
@@ -44,16 +43,17 @@ public class BlueFrontHideInACornerSimulator extends AutoExample {
     public void runOpMode() {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
+        actionTimer = new Timer();
 
         waitForStart();
         initHardware();
         initLogic();
+        actionTimer.resetTimer();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose());
+        follower.setStartingPose(Paths.startPose);
         opmodeTimer.resetTimer();
         setPathState(0);
-
+        Paths paths = new Paths(follower);
         while (opModeIsActive()) {
             // These loop the movements of the robot, these must be called continuously in order to work
             follower.update();

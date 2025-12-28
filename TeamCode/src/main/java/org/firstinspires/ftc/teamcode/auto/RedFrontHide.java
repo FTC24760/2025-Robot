@@ -10,10 +10,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Front Hide", group = "auto")
-public class RedFrontHideInACornerSimulator extends AutoExample {
+public class RedFrontHide extends AutoExample {
     public static class Paths {
         public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
-        public static Pose endPose = new Pose(84, 108, Math.toRadians(90));
+        public static Pose endPose = new Pose(96, 132, Math.toRadians(90));
 
         public static Path path;
         public Paths(Follower follower) {
