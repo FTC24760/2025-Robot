@@ -1,26 +1,7 @@
-package org.firstinspires.ftc.teamcode.teleop;
+package org.firstinspires.ftc.teamcode.teleop.oldrobot;
 
 import com.pedropathing.util.Timer;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo; // <--- IMPORT ADDED
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.robot.Robot;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @TeleOp(name="Manual TeleOp", group="Competition")
 public class ManualTeleOp extends DualCameraTeleOp {
