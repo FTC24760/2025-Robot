@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.teleop.oldrobot;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="Regular Drive")
+@TeleOp(name="Regular mecanum Drive")
+@Disabled
 public class NonFieldOrientedDrive extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();

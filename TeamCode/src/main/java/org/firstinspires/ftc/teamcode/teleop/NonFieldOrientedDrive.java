@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode.teleop;
 import static org.firstinspires.ftc.teamcode.SwerveRotationalPID.R_D;
 import static org.firstinspires.ftc.teamcode.SwerveRotationalPID.R_I;
 import static org.firstinspires.ftc.teamcode.SwerveRotationalPID.R_P;
-import static org.firstinspires.ftc.teamcode.SwerveTranslationalPID.T_D;
-import static org.firstinspires.ftc.teamcode.SwerveTranslationalPID.T_I;
-import static org.firstinspires.ftc.teamcode.SwerveTranslationalPID.T_P;
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -26,8 +23,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name="Field Oriented Drive")
-public class FieldOrientedDrive extends OpMode
+@TeleOp(name="Non Field Oriented Drive- Swerve")
+public class NonFieldOrientedDrive extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive1, leftDrive2, rightDrive1, rightDrive2;

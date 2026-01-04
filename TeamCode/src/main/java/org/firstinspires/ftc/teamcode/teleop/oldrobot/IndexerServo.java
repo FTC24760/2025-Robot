@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.teleop.oldrobot;
 
 import static java.lang.Math.floor;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="Revolver/Indexer Servo Testing", group="Teleop")
+@Disabled
 public class IndexerServo extends LinearOpMode {
 
     // Declare OpMode members.

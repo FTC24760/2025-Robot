@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop.oldrobot;
 
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="Manual TeleOp", group="Competition")
+@Disabled
 public class ManualTeleOp extends DualCameraTeleOp {
     private int scoringState;
     Timer actionTimer;

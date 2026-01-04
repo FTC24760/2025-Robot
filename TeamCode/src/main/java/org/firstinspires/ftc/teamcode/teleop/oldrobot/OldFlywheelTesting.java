@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.teleop.oldrobot;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name="Flywheel testing")
-public class FlywheelTesting extends OpMode
+@TeleOp(name="OLD Flywheel testing")
+@Disabled
+public class OldFlywheelTesting extends OpMode
 {
     DcMotor flywheelLeft;
     DcMotor flywheelRight;
