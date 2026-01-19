@@ -49,7 +49,7 @@ public class PrototypeTeleop extends OpMode {
     private static final double LEFT_ZERO_OFFSET = toRadians(0);
     private static final double RIGHT_ZERO_OFFSET = toRadians(0);
 
-    private static final double SHOOTER_VELOCITY = 1500; // Ticks per second
+    private static final double SHOOTER_VELOCITY = 99999; // Ticks per second
     private static final double BLOCKER_OPEN = 0.5;
     private static final double BLOCKER_CLOSED = 0.0;
 
@@ -95,6 +95,10 @@ public class PrototypeTeleop extends OpMode {
         // 2. Mechanisms
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
         middleMotor = hardwareMap.get(DcMotorEx.class, "middle");
+
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        middleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         leftFlywheel = hardwareMap.get(DcMotorEx.class, "leftShooter");
         rightFlywheel = hardwareMap.get(DcMotorEx.class, "rightShooter");
 
