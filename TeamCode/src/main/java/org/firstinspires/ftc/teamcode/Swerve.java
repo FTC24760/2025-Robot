@@ -7,6 +7,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.hypot;
+import static java.lang.Math.min;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
 
@@ -48,7 +49,7 @@ public class Swerve {
         drive1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         drive2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public void update(double rotatedX, double rotatedY, double driveTurn) {
+    public double[] calculate(double rotatedX, double rotatedY, double driveTurn) {
         // -------------------------------- KINEMATICS --------------------------------
         double deltaX = rotatedX + driveTurn * cos(theta + toRadians(90)); // direction of rotation is 90 degrees from direction to center
         double deltaY = rotatedY + driveTurn * sin(theta + toRadians(90));
@@ -85,15 +86,23 @@ public class Swerve {
 
             if (abs(rotationPower) + abs(translationPower) > 1)
                 translationPower *= (1 - abs(rotationPower)) / abs(translationPower);*/
-        double translationPower = targetSpeed;
-        drive1.setPower(rotationPower + translationPower);
-        drive2.setPower(rotationPower - translationPower);
+        double translationPower = targetSpeed / abs(targetSpeed) * min(abs(targetSpeed), 1-abs(rotationPower));
 
         lastE = rotE;
         lastTime = timePID.milliseconds();
+
         //lastWheelRotation = wheelRotation;
         //lastWheelSpeed = wheelSpeed;
 
+        double[] wheelPowers = new double[2];
+        wheelPowers[0] = rotationPower + translationPower;
+        wheelPowers[1] = rotationPower - translationPower;
+        return wheelPowers;
+    }
+    public void update(double rotatedX, double rotatedY, double driveTurn) {
+        double[] wheelPowers = calculate(rotatedX, rotatedY, driveTurn);
+        drive1.setPower(wheelPowers[0]);
+        drive2.setPower(wheelPowers[1]);
     }
     double a360(double angle) {
         while (angle > toRadians(360)) angle -= toRadians(360);

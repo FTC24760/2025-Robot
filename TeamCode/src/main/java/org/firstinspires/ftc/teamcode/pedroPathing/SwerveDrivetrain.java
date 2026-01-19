@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import static com.pedropathing.math.MathFunctions.findNormalizingScaling;
 
+import static java.lang.Math.toRadians;
+
 import com.pedropathing.Drivetrain;
-import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,11 +12,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+import org.firstinspires.ftc.teamcode.Swerve;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Swerve extends Drivetrain {
+public class SwerveDrivetrain extends Drivetrain {
+    private Vector lTurnVector, rTurnVector;
     private DcMotor l1, l2, r1, r2;
     private final List<DcMotor> motors;
     private VoltageSensor voltageSensor;
@@ -23,6 +26,7 @@ public class Swerve extends Drivetrain {
     private boolean useBrakeModeInTeleOp;
     private double staticFrictionCoefficient;
     private double xVelocity, yVelocity;
+    private Swerve lSwerve, rSwerve;
 
     /**
      * This creates a new Mecanum, which takes in various movement vectors and outputs
@@ -33,7 +37,7 @@ public class Swerve extends Drivetrain {
      *  this is the MecanumConstants object that contains the names of the motors and directions etc.
      */
 
-    public Swerve(HardwareMap hardwareMap) {
+    public SwerveDrivetrain(HardwareMap hardwareMap) {
         this.maxPowerScaling = 1;
         this.motorCachingThreshold = 0.01;
         this.useBrakeModeInTeleOp = false;
@@ -46,7 +50,14 @@ public class Swerve extends Drivetrain {
         r2 = hardwareMap.get(DcMotor.class, "r2");
 
         motors = Arrays.asList(l1, l2, r1, r2);
-
+        lSwerve = new Swerve(l1, l2, toRadians(225));
+        lTurnVector = new Vector();
+        lTurnVector.setMagnitude(1);
+        lTurnVector.setTheta(225 + 90);
+        rTurnVector = new Vector();
+        rTurnVector.setMagnitude(1);
+        rTurnVector.setTheta(315 + 90);
+        rSwerve = new Swerve(r1, r2, toRadians(315));
         for (DcMotor motor : motors) {
             MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
             motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
@@ -102,7 +113,6 @@ public class Swerve extends Drivetrain {
             pathingPower.setMagnitude(maxPowerScaling);
 
         // the powers for the wheel vectors
-        double[] wheelPowers = new double[4];
 
         // This contains a copy of the mecanum wheel vectors
         Vector[] mecanumVectorsCopy = new Vector[4];
@@ -116,8 +126,8 @@ public class Swerve extends Drivetrain {
             truePathingVectors[1] = correctivePower.copy();
         } else {
             // corrective power did not take up all the power, so add on heading power
-            Vector leftSideVector = correctivePower.minus(headingPower);
-            Vector rightSideVector = correctivePower.plus(headingPower);
+            Vector leftSideVector = correctivePower.plus(lTurnVector.times(headingPower.getMagnitude()));
+            Vector rightSideVector = correctivePower.plus(rTurnVector.times(headingPower.getMagnitude()));
 
             if (leftSideVector.getMagnitude() > maxPowerScaling || rightSideVector.getMagnitude() > maxPowerScaling) {
                 //if the combined corrective and heading power is greater than 1, then scale down heading power
@@ -144,7 +154,9 @@ public class Swerve extends Drivetrain {
 
         truePathingVectors[0] = truePathingVectors[0].times(2.0);
         truePathingVectors[1] = truePathingVectors[1].times(2.0);
-
+        double[] lSpeeds = lSwerve.calculate(truePathingVectors[0].getXComponent(), truePathingVectors[0].getYComponent(), 0);
+        double[] rSpeeds = rSwerve.calculate(truePathingVectors[1].getXComponent(), truePathingVectors[1].getYComponent(), 0);
+        double[] wheelPowers = {lSpeeds[0], lSpeeds[1], rSpeeds[0], rSpeeds[1]};
         for (int i = 0; i < mecanumVectorsCopy.length; i++) {
             // this copies the vectors from mecanumVectors but creates new references for them
             mecanumVectorsCopy[i] = vectors[i].copy();
@@ -152,10 +164,6 @@ public class Swerve extends Drivetrain {
             mecanumVectorsCopy[i].rotateVector(robotHeading);
         }
 
-        wheelPowers[0] = (mecanumVectorsCopy[1].getXComponent() * truePathingVectors[0].getYComponent() - truePathingVectors[0].getXComponent() * mecanumVectorsCopy[1].getYComponent()) / (mecanumVectorsCopy[1].getXComponent() * mecanumVectorsCopy[0].getYComponent() - mecanumVectorsCopy[0].getXComponent() * mecanumVectorsCopy[1].getYComponent());
-        wheelPowers[1] = (mecanumVectorsCopy[0].getXComponent() * truePathingVectors[0].getYComponent() - truePathingVectors[0].getXComponent() * mecanumVectorsCopy[0].getYComponent()) / (mecanumVectorsCopy[0].getXComponent() * mecanumVectorsCopy[1].getYComponent() - mecanumVectorsCopy[1].getXComponent() * mecanumVectorsCopy[0].getYComponent());
-        wheelPowers[2] = (mecanumVectorsCopy[3].getXComponent() * truePathingVectors[1].getYComponent() - truePathingVectors[1].getXComponent() * mecanumVectorsCopy[3].getYComponent()) / (mecanumVectorsCopy[3].getXComponent() * mecanumVectorsCopy[2].getYComponent() - mecanumVectorsCopy[2].getXComponent() * mecanumVectorsCopy[3].getYComponent());
-        wheelPowers[3] = (mecanumVectorsCopy[2].getXComponent() * truePathingVectors[1].getYComponent() - truePathingVectors[1].getXComponent() * mecanumVectorsCopy[2].getYComponent()) / (mecanumVectorsCopy[2].getXComponent() * mecanumVectorsCopy[3].getYComponent() - mecanumVectorsCopy[3].getXComponent() * mecanumVectorsCopy[2].getYComponent());
 
         if (voltageCompensation) {
             double voltageNormalized = getVoltageNormalized();
