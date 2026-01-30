@@ -34,7 +34,7 @@ public class PrototypeTeleop extends OpMode {
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     private static final double SHOOTER_VELOCITY = 999999;
 
-    private static final double BLOCKER_OPEN = 0.25;
+    private static final double BLOCKER_OPEN = 0.27;
     private static final double BLOCKER_CLOSED = 0.0;
 
     // Alignment Gain from your old code
