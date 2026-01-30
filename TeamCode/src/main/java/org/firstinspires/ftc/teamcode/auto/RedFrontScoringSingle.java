@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Single Score", group = "Auto")
 public class RedFrontScoringSingle extends AutoExample {
-   public static Pose startPose = new Pose(122, 122, Math.toRadians(225));
-    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(225));
+   public static Pose startPose = new Pose(122, 122, Math.toRadians(45));
+    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(45));
     public static Pose parkPose = new Pose(96, 60, Math.toRadians(90));
 
     public static class Paths {
