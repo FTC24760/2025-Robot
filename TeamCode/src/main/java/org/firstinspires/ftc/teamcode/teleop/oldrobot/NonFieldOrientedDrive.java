@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="Regular mecanum Drive")
-@Disabled
 public class NonFieldOrientedDrive extends OpMode
 {
     private ElapsedTime runtime = new ElapsedTime();
@@ -57,10 +56,10 @@ public class NonFieldOrientedDrive extends OpMode
         double rx = gamepad1.right_stick_x;
 
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        leftFrontPower = (y + x + rx) / denominator;
-        leftBackPower = (y - x + rx) / denominator;
+        leftFrontPower  = (y + x + rx) / denominator;
+        leftBackPower   = (y - x + rx) / denominator;
         rightFrontPower = (y - x - rx) / denominator;
-        rightBackPower = (y + x - rx) / denominator;
+        rightBackPower  = (y + x - rx) / denominator;
 
         leftFrontDrive.setPower(leftFrontPower);
         leftBackDrive.setPower(leftBackPower);

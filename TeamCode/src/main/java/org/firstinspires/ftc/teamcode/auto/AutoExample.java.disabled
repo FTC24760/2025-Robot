@@ -13,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -21,62 +22,16 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleop.PrototypeTeleop;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Disabled
 @Autonomous(name = "Rear double score", group = "auto")
-public class AutoExample extends LinearOpMode {
-    public List<List<String>> motifs = new ArrayList<>(Arrays.asList(
-            new ArrayList<>(Arrays.asList("Green", "Purple", "Purple")),
-            new ArrayList<>(Arrays.asList("Purple", "Green", "Purple")),
-            new ArrayList<>(Arrays.asList("Purple", "Purple", "Green"))));
-
+public class AutoExample extends PrototypeTeleop {
     Follower follower;
-    public DcMotor lf, lb, rf, rb;
-    public DcMotor flywheelL, flywheelR;
-    public Servo revolverServo;
-    public Servo claw1, claw2, claw3;
-    public Servo kicker;
-    public CRServo intakeSpinner; // <--- NEW: Continuous Rotation Intake Servo
-    public IMU imu;
-
-    // CAMERAS
-    public Limelight3A limelight; // FRONT: Intake Alignment
-    public HuskyLens huskyLens; // BACK:  Score Alignment
-
-    // --- CONSTANTS ---
-    public final double[] INTAKE_POSITIONS = {
-            0.62,
-            0.245,
-            1.0
-    };
-    public final double[] SCORE_POSITIONS = {
-            0.075,
-            0.805,
-            0.45
-    };
-
-    public final double KICKER_REST = 0.75;
-    public final double KICKER_FIRE = 0.54;
-
-    public final double SCORING_POWER_HIGH = -0.51;
-    public final double SCORING_POWER_LOW = -0.54;
-
-    // --- LIMELIGHT DRIVE CONSTANTS (NEW) ---
-    // Adjust DESIRED_TY based on how close you want to be to the ball.
-    // If the camera is angled down, -20.0 is usually very close, 0.0 is far.
-    public final double DESIRED_TY = -18.0;
-    public final double DRIVE_GAIN = 0.03; // Speed multiplier for distance
-    public final double TURN_GAIN = 0.02; // Speed multiplier for turning
-    public final double MAX_AUTO_SPEED = 0.5; // Safety cap
-    // --- GAME LOGIC ---
-    public List < String > motif = new ArrayList < > (Arrays.asList("Purple", "Purple", "Green"));
-    public int motifIndex = 0;
-    public List < IntakeSlot > slots = new ArrayList < > ();
-    public int targetSlotIndex = -1;
-    public double driveDirection = 1.0;
     // Pedropathing variables;
 
     public Timer pathTimer, actionTimer, opmodeTimer;
@@ -156,7 +111,6 @@ public class AutoExample extends LinearOpMode {
             case 0:
                 flywheelL.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
                 flywheelR.setPower(highSpeed ? SCORING_POWER_HIGH : SCORING_POWER_LOW);
-                targetSlotIndex = getSlotWithColor(motif.get(motifIndex));
                 if (targetSlotIndex < 0) {
                     scoringState = -1;
                     flywheelL.setPower(0);
@@ -185,12 +139,6 @@ public class AutoExample extends LinearOpMode {
                     scoringState = 0;
                     actionTimer.resetTimer();
 
-                    slots.get(targetSlotIndex).occupied = false;
-                    slots.get(targetSlotIndex).isClawOpen = false;
-                    updateRevolverServos();
-                    slots.get(targetSlotIndex).color = "None";
-                    motifIndex++;
-                    motifIndex = motifIndex % motif.size();
                 }
                 break;
         }
@@ -330,3 +278,4 @@ public class AutoExample extends LinearOpMode {
         return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
 }
+
