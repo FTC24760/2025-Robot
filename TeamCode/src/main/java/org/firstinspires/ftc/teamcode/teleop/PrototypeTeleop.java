@@ -15,6 +15,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.util.Timer;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -24,32 +31,29 @@ import java.util.List;
 public class PrototypeTeleop extends OpMode {
 
     // --- Hardware ---
-    private DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
-    private DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
-    private Servo hoodServo, blockerServo;
-    private IMU imu;
-    private Limelight3A limelight;
+    public DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
+    public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
+    public Servo hoodServo, blockerServo;
+    public IMU imu;
+    public Limelight3A limelight;
 
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
-    private static final double SHOOTER_VELOCITY = 999999;
+    public static final double SHOOTER_VELOCITY = 999999;
 
-    private static final double BLOCKER_OPEN = 0.27;
-    private static final double BLOCKER_CLOSED = 0.0;
+    public static final double BLOCKER_OPEN = 0.27;
+    public static final double BLOCKER_CLOSED = 0.0;
 
     // Alignment Gain from your old code
-    private static final double TURN_GAIN = 0.02;
-    private static final double MAX_AUTO_TURN = 0.5;
+    public static final double TURN_GAIN = 0.02;
+    public static final double MAX_AUTO_TURN = 0.5;
 
     // Pipeline IDs
-    private static final int PIPELINE_NEURAL = 0; // Game Pieces
-    private static final int PIPELINE_TAGS = 1;   // AprilTags
+    public static final int PIPELINE_NEURAL = 0; // Game Pieces
+    public static final int PIPELINE_TAGS = 1;   // AprilTags
 
-    private boolean isShootingMode = false;
-
-    @Override
-    public void init() {
-        // 1. Drivetrain
+    public boolean isShootingMode = false;
+    public void initHardware() {
         flDrive = hardwareMap.get(DcMotorEx.class, "flDrive");
         rlDrive = hardwareMap.get(DcMotorEx.class, "rlDrive");
         frDrive = hardwareMap.get(DcMotorEx.class, "frDrive");
@@ -93,11 +97,16 @@ public class PrototypeTeleop extends OpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(PIPELINE_NEURAL);
         limelight.start();
+    }
+    @Override
+    public void init() {
+        // 1. Drivetrain
+        initHardware();
 
         telemetry.addData("Status", "Initialized - Velocity Mode Active");
     }
 
-    private void configureDriveMotor(DcMotorEx motor) {
+    public void configureDriveMotor(DcMotorEx motor) {
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -195,7 +204,7 @@ public class PrototypeTeleop extends OpMode {
         telemetry.update();
     }
 
-    private void setMecanumPower(double strafe, double forward, double turn) {
+    public void setMecanumPower(double strafe, double forward, double turn) {
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Field Centric Rotation
@@ -207,5 +216,8 @@ public class PrototypeTeleop extends OpMode {
         rlDrive.setPower((rotY - rotX + turn) / denominator);
         frDrive.setPower((rotY - rotX - turn) / denominator);
         rrDrive.setPower((rotY + rotX - turn) / denominator);
+    }
+    Pose getAprilTagLocalization() {
+        return new Pose();
     }
 }
