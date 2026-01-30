@@ -113,6 +113,8 @@ public class AutoExample extends PrototypeTeleop {
             case 0:
                 actionTimer.resetTimer();
                 scoringState = 1;
+
+                break;
             case 1:
                 leftFlywheel.setPower(SHOOTER_VELOCITY);
                 rightFlywheel.setPower(SHOOTER_VELOCITY);
@@ -120,12 +122,16 @@ public class AutoExample extends PrototypeTeleop {
                     scoringState = 2;
                     actionTimer.resetTimer();
                 }
+
+                break;
             case 2:
                 middleMotor.setPower(1.0);
                 intakeMotor.setPower(1.0);
                 if (actionTimer.getElapsedTime() > 10) {
                     scoringState = -1;
                 }
+
+                break;
 
         }
     }
