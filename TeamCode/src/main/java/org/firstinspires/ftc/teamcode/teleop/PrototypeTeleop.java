@@ -127,8 +127,8 @@ public class PrototypeTeleop extends OpMode {
         // Right Trigger = Intake Mode (Game Piece Align)
         // Default = Driver Control (No Align)
 
-        isShootingMode = gamepad1.right_bumper;
-        boolean isIntaking = gamepad1.right_trigger > 0.1;
+        isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
+        boolean isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
         // Mechanism Power Control
         if (isShootingMode) {
@@ -146,7 +146,7 @@ public class PrototypeTeleop extends OpMode {
             intakeMotor.setPower(0.8);
             middleMotor.setPower(0.3);
             blockerServo.setPosition(BLOCKER_CLOSED);
-        } else if (isShootingMode && gamepad1.left_bumper) { // Fire
+        } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
             middleMotor.setPower(1.0);
             blockerServo.setPosition(BLOCKER_OPEN);
             intakeMotor.setPower(0);
