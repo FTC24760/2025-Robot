@@ -41,8 +41,8 @@ public class PrototypeTeleop extends OpMode {
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     public static final double SHOOTER_VELOCITY = 999999;
 
-    public static final double BLOCKER_OPEN = 0.27;
-    public static final double BLOCKER_CLOSED = 0.0;
+    public static final double BLOCKER_OPEN = 0.75;
+    public static final double BLOCKER_CLOSED = 1.0;
 
     // Alignment Gain from your old code
     public static final double TURN_GAIN = 0.02;
@@ -51,6 +51,9 @@ public class PrototypeTeleop extends OpMode {
     // Pipeline IDs
     public static final int PIPELINE_NEURAL = 0; // Game Pieces
     public static final int PIPELINE_TAGS = 1;   // AprilTags
+
+    // Hood servo position
+    public double hoodPosition = 0.0;
 
     public boolean isShootingMode = false;
     public void initHardware() {

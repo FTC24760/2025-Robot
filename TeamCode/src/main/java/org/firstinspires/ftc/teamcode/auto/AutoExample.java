@@ -119,6 +119,7 @@ public class AutoExample extends PrototypeTeleop {
                 leftFlywheel.setPower(SHOOTER_VELOCITY);
                 rightFlywheel.setPower(SHOOTER_VELOCITY);
                 if (actionTimer.getElapsedTime() > 2000) {
+                    blockerServo.setPosition(0.75);
                     scoringState = 2;
                     actionTimer.resetTimer();
                 }
