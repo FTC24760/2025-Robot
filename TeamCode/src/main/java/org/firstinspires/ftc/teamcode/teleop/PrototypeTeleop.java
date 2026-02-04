@@ -39,7 +39,7 @@ public class PrototypeTeleop extends OpMode {
 
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
-    public static final double SHOOTER_VELOCITY = 999999;
+    public static final double SHOOTER_VELOCITY = 4000;
 
     public static final double BLOCKER_OPEN = 0.75;
     public static final double BLOCKER_CLOSED = 1.0;
