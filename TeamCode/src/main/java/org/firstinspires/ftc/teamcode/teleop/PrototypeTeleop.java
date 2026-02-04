@@ -6,7 +6,10 @@ import static java.lang.Math.sin;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+
+import com.pedropathing.geometry.CoordinateSystem;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -24,6 +27,10 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
@@ -31,6 +38,7 @@ import java.util.List;
 public class PrototypeTeleop extends OpMode {
 
     // --- Hardware ---
+    Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(0, 0, 0 ,0));
     public DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
     public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
     public Servo hoodServo, blockerServo;
@@ -164,7 +172,7 @@ public class PrototypeTeleop extends OpMode {
         double driveY = -gamepad1.left_stick_y; // Forward
         double driveX = gamepad1.left_stick_x * 1.1; // Strafe
         double driveTurn = gamepad1.right_stick_x; // Manual Turn (Default)
-
+/*
         LLResult result = limelight.getLatestResult();
         boolean targetFound = false;
         double tx = 0;
@@ -196,13 +204,13 @@ public class PrototypeTeleop extends OpMode {
             // Optional: Clamp max speed so it doesn't whip around too fast
             driveTurn = Math.max(-MAX_AUTO_TURN, Math.min(MAX_AUTO_TURN, autoTurn));
         }
-
+*/
         setMecanumPower(driveX, driveY, driveTurn);
 
         // --- 4. Telemetry ---
         telemetry.addData("Mode", isShootingMode ? "SHOOTING (Tag)" : (isIntaking ? "INTAKING (Neural)" : "DRIVER"));
-        telemetry.addData("Target Found", targetFound);
-        telemetry.addData("TX", tx);
+        /*telemetry.addData("Target Found", targetFound);
+        telemetry.addData("TX", tx);*/
         telemetry.addData("Flywheel Velocity", leftFlywheel.getVelocity());
         telemetry.update();
     }
@@ -220,7 +228,32 @@ public class PrototypeTeleop extends OpMode {
         frDrive.setPower((rotY - rotX - turn) / denominator);
         rrDrive.setPower((rotY + rotX - turn) / denominator);
     }
-    Pose getAprilTagLocalization() {
-        return new Pose();
+    void updatePose(Follower follower) {
+        limelight.updateRobotOrientation(imu.getRobotYawPitchRollAngles().getYaw());
+        LLResult result = limelight.getLatestResult();
+
+        Pose3D robotPose = result.getBotpose_MT2();
+        Position robotPosition = robotPose.getPosition();
+        YawPitchRollAngles robotOrientation = robotPose.getOrientation();
+        if (robotPose != oldPose) {
+            follower.setPose(new Pose( robotPosition.y+72, 72-robotPosition.x, robotOrientation.getYaw()));
+        }
+
+        // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+        /*if(Math.abs(m_gyro.getRate()) > 360)
+        {
+            doRejectUpdate = true;
+        }
+        if(mt2.tagCount == 0)
+        {
+            doRejectUpdate = true;
+        }
+        if(!doRejectUpdate)
+        {
+            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+            m_poseEstimator.addVisionMeasurement(
+                    mt2.pose,
+                    mt2.timestampSeconds);
+        }*/
     }
 }
