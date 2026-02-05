@@ -39,7 +39,8 @@ public class PrototypeTeleop extends OpMode {
 
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
-    public static final double SHOOTER_VELOCITY = 4000;
+    public static final double CLOSE_SHOOTER_VELOCITY = 4000;
+    public static final double FAR_SHOOTER_VELOCITY = 999999;
 
     public static final double BLOCKER_OPEN = 0.75;
     public static final double BLOCKER_CLOSED = 1.0;
@@ -135,8 +136,8 @@ public class PrototypeTeleop extends OpMode {
 
         // Mechanism Power Control
         if (isShootingMode) {
-            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
+            leftFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
+            rightFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
             limelight.pipelineSwitch(PIPELINE_TAGS);
         } else {
             leftFlywheel.setVelocity(0);

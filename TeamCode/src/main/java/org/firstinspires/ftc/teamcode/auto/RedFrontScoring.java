@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Red Single Score", group = "Auto")
-public class RedFrontScoringSingle extends AutoExample {
+@Autonomous(name = "Red Front Score", group = "Auto")
+public class RedFrontScoring extends AutoExample {
     public static Pose startPose = new Pose(122, 122, Math.toRadians(45));
     public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(45));
 
@@ -252,8 +252,8 @@ public class RedFrontScoringSingle extends AutoExample {
 
     public void runScoreLogic(boolean active) {
         if (active) {
-            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
+            leftFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
+            rightFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
             if (actionTimer.getElapsedTimeSeconds() > 1.5) {
                 middleMotor.setPower(1.0);
                 blockerServo.setPosition(0.75);
