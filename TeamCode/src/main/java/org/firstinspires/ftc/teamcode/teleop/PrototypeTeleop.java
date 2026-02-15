@@ -38,7 +38,7 @@ import java.util.List;
 public class PrototypeTeleop extends OpMode {
 
     // --- Hardware ---
-    Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(0, 0, 0 ,0));
+    Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0.0, 0.0 ,0.0, 0));
     public DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
     public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
     public Servo hoodServo, blockerServo;
