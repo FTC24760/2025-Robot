@@ -6,65 +6,70 @@ import static java.lang.Math.sin;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-
-import com.pedropathing.geometry.CoordinateSystem;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ftc.FTCCoordinates;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
 @TeleOp(name="Mecanum Teleop (Final Tuned)")
-public class PrototypeTeleop extends OpMode {
+public class NewPrototypeTeleop extends OpMode {
 
     // --- Hardware ---
-    Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0.0, 0.0 ,0.0, 0));
     public DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
     public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
-    public Servo hoodServo, blockerServo;
+
+    // Added blockerServo2 and Lift Servos
+    public Servo hoodServo, blockerServo, blockerServo2;
+    public CRServo liftLeft, liftRight;
+
     public IMU imu;
     public Limelight3A limelight;
 
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
-    public static final double CLOSE_SHOOTER_VELOCITY = 4000;
-    public static final double FAR_SHOOTER_VELOCITY = 999999;
+    public static final double SHOOTER_VELOCITY = 999999;
 
+    // Blocker 1 Constants
     public static final double BLOCKER_OPEN = 0.75;
     public static final double BLOCKER_CLOSED = 1.0;
+
+    // Blocker 2 Constants (Adjust these if the servo is mounted reversed)
+    public static final double BLOCKER_2_OPEN = 0.75;
+    public static final double BLOCKER_2_CLOSED = 1.0;
 
     // Alignment Gain from your old code
     public static final double TURN_GAIN = 0.02;
     public static final double MAX_AUTO_TURN = 0.5;
 
+    // Hood Tuning Constants
+    // Equation: Hood Pos = HOOD_BASE + (Target_Y_Degrees * HOOD_GAIN)
+    public static final double HOOD_BASE = 0.5; // Starting position
+    public static final double HOOD_GAIN = 0.01; // How much to move per degree of distance
+    public static final double HOOD_MIN = 0.2;   // Safety Clamp
+    public static final double HOOD_MAX = 0.8;   // Safety Clamp
+
+    // Lift Power
+    public static final double LIFT_POWER = 1.0;
+
     // Pipeline IDs
     public static final int PIPELINE_NEURAL = 0; // Game Pieces
     public static final int PIPELINE_TAGS = 1;   // AprilTags
 
-    // Hood servo position
-    public double hoodPosition = 0.0;
-
     public boolean isShootingMode = false;
+
     public void initHardware() {
         flDrive = hardwareMap.get(DcMotorEx.class, "flDrive");
         rlDrive = hardwareMap.get(DcMotorEx.class, "rlDrive");
@@ -96,8 +101,19 @@ public class PrototypeTeleop extends OpMode {
         rightFlywheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
         hoodServo = hardwareMap.get(Servo.class, "hood");
+
+        // Blockers
         blockerServo = hardwareMap.get(Servo.class, "blocker");
+        blockerServo2 = hardwareMap.get(Servo.class, "blocker2"); // New Hardware Map
+
         blockerServo.setPosition(BLOCKER_CLOSED);
+        blockerServo2.setPosition(BLOCKER_2_CLOSED);
+
+        // Lift CR Servos
+        liftLeft = hardwareMap.get(CRServo.class, "liftLeft");
+        liftRight = hardwareMap.get(CRServo.class, "liftRight");
+        // Reverse one if they are mounted symmetrically
+        liftRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // 3. Sensors
         imu = hardwareMap.get(IMU.class, "imu");
@@ -110,11 +126,11 @@ public class PrototypeTeleop extends OpMode {
         limelight.pipelineSwitch(PIPELINE_NEURAL);
         limelight.start();
     }
+
     @Override
     public void init() {
         // 1. Drivetrain
         initHardware();
-
         telemetry.addData("Status", "Initialized - Velocity Mode Active");
     }
 
@@ -135,60 +151,79 @@ public class PrototypeTeleop extends OpMode {
         if (gamepad1.options) imu.resetYaw();
 
         // --- 2. Mode Selection ---
-        // Right Bumper = Shooting Mode (Tag Align)
-        // Right Trigger = Intake Mode (Game Piece Align)
-        // Default = Driver Control (No Align)
-
         isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
         boolean isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
         // Mechanism Power Control
         if (isShootingMode) {
-            leftFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
+            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
+            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
             limelight.pipelineSwitch(PIPELINE_TAGS);
         } else {
             leftFlywheel.setVelocity(0);
             rightFlywheel.setVelocity(0);
-            // If intaking, use Neural pipeline, otherwise Neural (default)
             limelight.pipelineSwitch(PIPELINE_NEURAL);
         }
 
+        // Intake & Blocker Logic
         if (isIntaking) {
             intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.3);
+            middleMotor.setPower(0.3); // Kept existing value, ensuring it runs
             blockerServo.setPosition(BLOCKER_CLOSED);
+            blockerServo2.setPosition(BLOCKER_2_CLOSED);
         } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
             middleMotor.setPower(1.0);
             blockerServo.setPosition(BLOCKER_OPEN);
+            blockerServo2.setPosition(BLOCKER_2_OPEN);
             intakeMotor.setPower(0);
         } else {
             intakeMotor.setPower(0);
             middleMotor.setPower(0);
             blockerServo.setPosition(BLOCKER_CLOSED);
+            blockerServo2.setPosition(BLOCKER_2_CLOSED);
         }
 
-        // --- 3. Hybrid Drive & Auto Align Logic ---
+        // --- 3. Lift Logic (Operator Control) ---
+        if (gamepad2.dpad_up) {
+            liftLeft.setPower(LIFT_POWER);
+            liftRight.setPower(LIFT_POWER);
+        } else if (gamepad2.dpad_down) {
+            liftLeft.setPower(-LIFT_POWER);
+            liftRight.setPower(-LIFT_POWER);
+        } else {
+            liftLeft.setPower(0);
+            liftRight.setPower(0);
+        }
 
-        double driveY = -gamepad1.left_stick_y; // Forward
-        double driveX = gamepad1.left_stick_x * 1.1; // Strafe
-        double driveTurn = gamepad1.right_stick_x; // Manual Turn (Default)
-/*
+        // --- 4. Hybrid Drive & Auto Align/Hood Logic ---
+        double driveY = -gamepad1.left_stick_y;
+        double driveX = gamepad1.left_stick_x * 1.1;
+        double driveTurn = gamepad1.right_stick_x;
+
         LLResult result = limelight.getLatestResult();
         boolean targetFound = false;
         double tx = 0;
+        double ty = 0; // Vertical offset for Hood
 
-        // Determine if we should Auto-Align
         if (result != null && result.isValid()) {
             if (isShootingMode) {
                 // ALIGN TO APRILTAG
                 List<LLResultTypes.FiducialResult> tags = result.getFiducialResults();
                 if (!tags.isEmpty()) {
                     tx = tags.get(0).getTargetXDegrees();
+                    ty = tags.get(0).getTargetYDegrees(); // Get distance info
                     targetFound = true;
+
+                    // --- Auto Hood Adjustment ---
+                    // Calculates position based on Y-angle (Distance)
+                    double calculatedHoodPos = HOOD_BASE + (ty * HOOD_GAIN);
+
+                    // Clamp to safety limits
+                    calculatedHoodPos = Math.max(HOOD_MIN, Math.min(HOOD_MAX, calculatedHoodPos));
+                    hoodServo.setPosition(calculatedHoodPos);
                 }
             } else if (isIntaking) {
-                // ALIGN TO GAME PIECE (Neural/Color)
+                // ALIGN TO GAME PIECE
                 List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
                 if (!detections.isEmpty()) {
                     tx = detections.get(0).getTargetXDegrees();
@@ -199,20 +234,19 @@ public class PrototypeTeleop extends OpMode {
 
         // Apply Turn Override if Target Found
         if (targetFound) {
-            // Using your simple P-loop logic: turn = error * gain
             double autoTurn = tx * TURN_GAIN;
-
-            // Optional: Clamp max speed so it doesn't whip around too fast
             driveTurn = Math.max(-MAX_AUTO_TURN, Math.min(MAX_AUTO_TURN, autoTurn));
         }
-*/
+
         setMecanumPower(driveX, driveY, driveTurn);
 
-        // --- 4. Telemetry ---
-        telemetry.addData("Mode", isShootingMode ? "SHOOTING (Tag)" : (isIntaking ? "INTAKING (Neural)" : "DRIVER"));
-        /*telemetry.addData("Target Found", targetFound);
-        telemetry.addData("TX", tx);*/
-        telemetry.addData("Flywheel Velocity", leftFlywheel.getVelocity());
+        // --- 5. Telemetry ---
+        telemetry.addData("Mode", isShootingMode ? "SHOOTING" : (isIntaking ? "INTAKING" : "DRIVER"));
+        telemetry.addData("Target Found", targetFound);
+        telemetry.addData("Limelight TX", tx);
+        telemetry.addData("Limelight TY", ty);
+        telemetry.addData("Hood Pos", hoodServo.getPosition());
+        telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
         telemetry.update();
     }
 
@@ -229,32 +263,8 @@ public class PrototypeTeleop extends OpMode {
         frDrive.setPower((rotY - rotX - turn) / denominator);
         rrDrive.setPower((rotY + rotX - turn) / denominator);
     }
-    void updatePose(Follower follower) {
-        limelight.updateRobotOrientation(imu.getRobotYawPitchRollAngles().getYaw());
-        LLResult result = limelight.getLatestResult();
 
-        Pose3D robotPose = result.getBotpose_MT2();
-        Position robotPosition = robotPose.getPosition();
-        YawPitchRollAngles robotOrientation = robotPose.getOrientation();
-        if (robotPose != oldPose) {
-            follower.setPose(new Pose( robotPosition.y+72, 72-robotPosition.x, robotOrientation.getYaw()));
-        }
-
-        // if our angular velocity is greater than 360 degrees per second, ignore vision updates
-        /*if(Math.abs(m_gyro.getRate()) > 360)
-        {
-            doRejectUpdate = true;
-        }
-        if(mt2.tagCount == 0)
-        {
-            doRejectUpdate = true;
-        }
-        if(!doRejectUpdate)
-        {
-            m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-            m_poseEstimator.addVisionMeasurement(
-                    mt2.pose,
-                    mt2.timestampSeconds);
-        }*/
+    Pose getAprilTagLocalization() {
+        return new Pose();
     }
 }
