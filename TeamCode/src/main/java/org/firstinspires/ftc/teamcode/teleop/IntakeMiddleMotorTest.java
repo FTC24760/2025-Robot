@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="motor test")
-public class motorTest extends OpMode {
+@TeleOp(name="Intake and middle motor test")
+public class IntakeMiddleMotorTest extends OpMode {
     DcMotor r1, r2;
     @Override
     public void init() {

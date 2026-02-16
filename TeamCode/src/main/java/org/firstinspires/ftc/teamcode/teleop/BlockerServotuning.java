@@ -1,28 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="other Servo Position Tuning", group="Teleop")
-public class Servotuning extends LinearOpMode {
+@TeleOp(name="BLOCKER Servo Position Tuning", group="Teleop")
+public class BlockerServotuning extends LinearOpMode {
 
     // Declare OpMode members.
 
-    /*
-    POSITIONS:
-    slot 1 score - 0.075
-slot 2 score - 0.805
-slot 3 score - 0.45
 
-slot 1 intake - 0.62
-slot 2 intake - 0.245
-slot 3 intake - 1
-
-     */
     private ElapsedTime runtime = new ElapsedTime();
     private Servo servo;
     private Servo servo2;
