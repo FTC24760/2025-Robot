@@ -48,6 +48,7 @@ slot 3 intake - 1
 
             // move servo to postion
             servo.setPosition(servoPosition1);
+            servo2.setPosition(servoPosition2);
 
             // accept commands
             if (gamepad1.a) {

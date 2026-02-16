@@ -18,8 +18,8 @@ public class motorTest extends OpMode {
 
     @Override
     public void loop() {
-        r1.setPower(1.0);
-        r2.setPower(1.0);
+        r1.setPower(gamepad1.left_stick_y);
+        r2.setPower(gamepad1.right_stick_y);
     }
 
 }

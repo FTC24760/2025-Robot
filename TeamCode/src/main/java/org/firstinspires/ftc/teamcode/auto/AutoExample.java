@@ -7,7 +7,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.teamcode.teleop.OldPrototypeTeleop;
+import org.firstinspires.ftc.teamcode.teleop.oldrobot.OldPrototypeTeleop;
 
 @Disabled
 @Autonomous(name = "Rear double score", group = "auto")

@@ -43,12 +43,12 @@ public class NewPrototypeTeleop extends OpMode {
     public static final double SHOOTER_VELOCITY = 999999;
 
     // Blocker 1 Constants
-    public static final double BLOCKER_OPEN = 0.75;
-    public static final double BLOCKER_CLOSED = 1.0;
+    public static final double BLOCKER_OPEN = 0.0;
+    public static final double BLOCKER_CLOSED = 0.2;
 
     // Blocker 2 Constants (Adjust these if the servo is mounted reversed)
-    public static final double BLOCKER_2_OPEN = 0.75;
-    public static final double BLOCKER_2_CLOSED = 1.0;
+    public static final double BLOCKER_2_OPEN = 1.0;
+    public static final double BLOCKER_2_CLOSED = 0.8;
 
     // Alignment Gain from your old code
     public static final double TURN_GAIN = 0.02;
@@ -103,8 +103,8 @@ public class NewPrototypeTeleop extends OpMode {
         hoodServo = hardwareMap.get(Servo.class, "hood");
 
         // Blockers
-        blockerServo = hardwareMap.get(Servo.class, "blocker");
-        blockerServo2 = hardwareMap.get(Servo.class, "blocker2"); // New Hardware Map
+        blockerServo = hardwareMap.get(Servo.class, "blockerL");
+        blockerServo2 = hardwareMap.get(Servo.class, "blockerR");
 
         blockerServo.setPosition(BLOCKER_CLOSED);
         blockerServo2.setPosition(BLOCKER_2_CLOSED);
