@@ -16,7 +16,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 
@@ -71,6 +70,7 @@ public class NewPrototypeTeleop extends OpMode {
     // Pipeline IDs
     public static final int PIPELINE_NEURAL = 0; // Game Pieces
     public static final int PIPELINE_TAGS = 1;   // AprilTags
+    public static final int PIPELINE_MEGATAG = 3;
 
     public boolean isShootingMode = false;
 
