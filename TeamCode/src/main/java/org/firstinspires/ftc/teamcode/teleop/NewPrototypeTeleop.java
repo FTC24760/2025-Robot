@@ -41,14 +41,18 @@ public class NewPrototypeTeleop extends OpMode {
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     public static final double SHOOTER_VELOCITY = 999999;
+    // Shooter middle motor power - while shooting
+    public static final double MIDDLE_SHOOTING_POWER = 0.8;
+    // Shooter intake motor power - while shooting
+    public static final double INTAKE_SHOOTING_POWER = 0.7;
 
     // Blocker 1 Constants
     public static final double BLOCKER_OPEN = 0.0;
-    public static final double BLOCKER_CLOSED = 0.2;
+    public static final double BLOCKER_CLOSED = 0.275;
 
     // Blocker 2 Constants (Adjust these if the servo is mounted reversed)
     public static final double BLOCKER_2_OPEN = 1.0;
-    public static final double BLOCKER_2_CLOSED = 0.8;
+    public static final double BLOCKER_2_CLOSED = 0.858;
 
     // Alignment Gain from your old code
     public static final double TURN_GAIN = 0.02;
@@ -56,10 +60,10 @@ public class NewPrototypeTeleop extends OpMode {
 
     // Hood Tuning Constants
     // Equation: Hood Pos = HOOD_BASE + (Target_Y_Degrees * HOOD_GAIN)
-    public static final double HOOD_BASE = 0.5; // Starting position
-    public static final double HOOD_GAIN = 0.01; // How much to move per degree of distance
-    public static final double HOOD_MIN = 0.2;   // Safety Clamp
-    public static final double HOOD_MAX = 0.8;   // Safety Clamp
+    public static final double HOOD_BASE = 0.3; // Starting position
+    public static final double HOOD_GAIN = 0.0035; // How much to move per degree of distance
+    public static final double HOOD_MIN = 0.3;   // Safety Clamp
+    public static final double HOOD_MAX = 1.0;   // Safety Clamp
 
     // Lift Power
     public static final double LIFT_POWER = 1.0;
@@ -118,8 +122,8 @@ public class NewPrototypeTeleop extends OpMode {
         // 3. Sensors
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.DOWN));
         imu.initialize(parameters);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -168,11 +172,12 @@ public class NewPrototypeTeleop extends OpMode {
         // Intake & Blocker Logic
         if (isIntaking) {
             intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.3); // Kept existing value, ensuring it runs
+            middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
             blockerServo.setPosition(BLOCKER_CLOSED);
             blockerServo2.setPosition(BLOCKER_2_CLOSED);
         } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
-            middleMotor.setPower(1.0);
+            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
+            intakeMotor.setPower(INTAKE_SHOOTING_POWER);
             blockerServo.setPosition(BLOCKER_OPEN);
             blockerServo2.setPosition(BLOCKER_2_OPEN);
             intakeMotor.setPower(0);
