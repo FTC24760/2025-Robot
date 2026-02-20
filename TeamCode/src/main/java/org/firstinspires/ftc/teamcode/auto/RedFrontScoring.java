@@ -72,9 +72,7 @@ public class RedFrontScoring extends AutoExample {
     }
 
     @Override
-    public void loop() {
-        follower.update();
-        resetMotors();
+    public void pathLogic() {
         switch (pathState) {
             case 0:
                 follower.followPath(Paths.Path1);
@@ -187,11 +185,5 @@ public class RedFrontScoring extends AutoExample {
                 follower.holdPoint(parkPose);
                 break;
         }
-
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
     }
 }
