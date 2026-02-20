@@ -28,6 +28,7 @@ public class BlueFrontScoring extends RedFrontScoring {
     public static Pose intake3GrabPose = new Pose(144-120, 36, Math.toRadians(180-0));
 
     public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
+
     public static class Paths {
         public static Path Path1, PathToIntake1, PathGrab1, PathScore1;
         public static Path PathToIntake2, PathGrab2, PathScore2;

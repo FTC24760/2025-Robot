@@ -13,15 +13,4 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class BlueFrontHideInACornerSimulator extends RedFrontHideInACornerSimulator {
     public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-45));
     public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
-
-
-    public static class Paths {
-        public static Path Path1;
-
-        public Paths(Follower follower) {
-            Path1 = new Path(new BezierLine(startPose, parkPose));
-            Path1.setLinearHeadingInterpolation(startPose.getHeading(), parkPose.getHeading());
-
-        }
-    }
 }

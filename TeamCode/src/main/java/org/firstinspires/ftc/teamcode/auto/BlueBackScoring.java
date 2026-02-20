@@ -29,10 +29,6 @@ public class BlueBackScoring extends RedBackScoring {
 
     public static Pose parkPose = new Pose(144-108, 12, Math.toRadians(180-90));
 
-    public static double SHOOTING_TIME = 2.0; //  time when the shooter is on PLUs the wait time
-
-
-
     public static class Paths {
         public static Path Path1, PathToIntake1, PathGrab1, PathScore1;
         public static Path PathToIntake2, PathGrab2, PathScore2;
