@@ -24,35 +24,7 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
         }
     }
     @Override
-    public void init() {
-        initHardware();
-        pathTimer = new Timer();
-        opmodeTimer = new Timer();
-        actionTimer = new Timer();
-        Paths paths = new Paths(follower);
-    }
-    @Override
-    public void start() {
-
-        actionTimer.resetTimer();
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        opmodeTimer.resetTimer();
-        pathState = 0;
-    }
-
-    @Override
-    public void loop() {
-        // These loop the movements of the robot, these must be called continuously in order to work
-        follower.update();
+    public void pathLogic() {
         follower.followPath(Paths.Path1);
-        // Feedback to Driver Hub for debugging
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
-
-
     }
 }
