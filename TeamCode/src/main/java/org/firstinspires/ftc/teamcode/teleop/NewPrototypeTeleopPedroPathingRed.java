@@ -23,7 +23,8 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
     public String scoringFrontBack = "Front";
     public Follower follower = Constants.createFollower(hardwareMap);
     public Pose scorePose = redFrontScorePose;
-
+    double flyWheelSpeed, intakeMotorSpeed, middleMotorSpeed;
+    boolean isBlockerOpen;
     @Override
     public void loop() {
         updatePose(follower);
@@ -42,15 +43,9 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
 
         // Mechanism Power Control
         resetMotors();
-
-        if (isShootingMode) {
-            shootingLogic(gamepad1.left_bumper || gamepad2.left_bumper);
-        }
-
-        if (isIntaking) {
-            intakeLogic();
-        }
-
+        if (isShootingMode) shootingLogic(gamepad1.left_bumper || gamepad2.left_bumper);
+        if (isIntaking) intakeLogic();
+        updateMotors();
 
         // --- 3. Lift Logic (Operator Control) ---
         liftLeft.setPower(0);
@@ -115,26 +110,37 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         }*/
     }
     public void resetMotors() {
-        leftFlywheel.setVelocity(0);
-        rightFlywheel.setVelocity(0);
-        intakeMotor.setPower(0);
-        middleMotor.setPower(0);
-        blocker.setPosition(BLOCKER_CLOSED);
-        blocker2.setPosition(BLOCKER_2_CLOSED);
+        flyWheelSpeed = 0;
+        intakeMotorSpeed = 0;
+        middleMotorSpeed = 0;
+        isBlockerOpen = false;
     }
     public void shootingLogic(boolean fire) {
-        leftFlywheel.setVelocity(SHOOTER_VELOCITY);
-        rightFlywheel.setVelocity(SHOOTER_VELOCITY);
+        flyWheelSpeed = SHOOTER_VELOCITY;
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
         if (fire) {
-            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
-            intakeMotor.setPower(INTAKE_SHOOTING_POWER);
-            blocker.setPosition(BLOCKER_OPEN);
-            blocker2.setPosition(BLOCKER_2_OPEN);
+            middleMotorSpeed = MIDDLE_SHOOTING_POWER;
+            intakeMotorSpeed = INTAKE_SHOOTING_POWER;
+            isBlockerOpen = true;
         }
     }
     public void intakeLogic() {
-        intakeMotor.setPower(0.8);
-        middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
+        intakeMotorSpeed = 0.8;
+        middleMotorSpeed = 0.8;
+    }
+    public void updateMotors() {
+        leftFlywheel.setVelocity(flyWheelSpeed);
+        rightFlywheel.setVelocity(flyWheelSpeed);
+        intakeMotor.setPower(intakeMotorSpeed);
+        middleMotor.setPower(middleMotorSpeed);
+        if (isBlockerOpen) {
+            blocker.setPosition(BLOCKER_OPEN);
+            blocker2.setPosition(BLOCKER_2_OPEN);
+        }
+        else {
+            blocker.setPosition(BLOCKER_CLOSED);
+            blocker2.setPosition(BLOCKER_2_CLOSED);
+        }
+
     }
 }

@@ -74,6 +74,7 @@ public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
         follower.update();
         resetMotors();
         pathLogic();
+        updateMotors();
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
