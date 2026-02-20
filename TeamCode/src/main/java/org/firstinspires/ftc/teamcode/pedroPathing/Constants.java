@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
-import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -17,14 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(11.3)
-            .forwardZeroPowerAcceleration(-31)
-            .lateralZeroPowerAcceleration(-60)
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.06, 0.03, 0.000005, 0.6, 0.01))
-            .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.1, 0.01));
+            .mass(14.1)
+            //.forwardZeroPowerAcceleration(-31)
+            //.lateralZeroPowerAcceleration(-60)
+            .forwardZeroPowerAcceleration(-42.53)
+            .lateralZeroPowerAcceleration(-67.93)
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.06, 0.03, 0.000005, 0.6, 0.01));
 
-    //public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 4.0, 4.0);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -43,12 +42,12 @@ public class Constants {
             .leftRearMotorDirection(DcMotor.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotor.Direction.FORWARD)
             .rightRearMotorDirection(DcMotor.Direction.FORWARD)
-            .xVelocity(74)
-            .yVelocity(54)
-    ;
+            .xVelocity(70.55)
+            .yVelocity(49.18)
+            ;
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(0) // vertical distance from horizontal center of robot
-            .strafePodX(-2.5) // horizontal distance from vertical center of robot
+            .strafePodX(2.5) // horizontal distance from vertical center of robot
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
