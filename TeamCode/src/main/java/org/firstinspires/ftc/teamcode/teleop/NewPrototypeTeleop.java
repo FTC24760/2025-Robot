@@ -25,6 +25,7 @@ import java.util.List;
 
 @TeleOp(name="Mecanum Teleop (Final Tuned)")
 public class NewPrototypeTeleop extends OpMode {
+    boolean isIntaking;
 
     // --- Hardware ---
     public DcMotorEx flDrive, frDrive, rlDrive, rrDrive;
@@ -156,7 +157,7 @@ public class NewPrototypeTeleop extends OpMode {
 
         // --- 2. Mode Selection ---
         isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
-        boolean isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
+        isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
         // Mechanism Power Control
         if (isShootingMode) {

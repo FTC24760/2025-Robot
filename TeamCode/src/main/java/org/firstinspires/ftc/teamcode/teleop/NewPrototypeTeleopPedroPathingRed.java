@@ -5,6 +5,7 @@ import static java.lang.Math.toRadians;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -13,13 +14,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-public class NewPrototypeTeleopPedroPathing extends NewPrototypeTeleop {
+
+@TeleOp(name="Pedro TeleOp")
+public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
     public static final Pose redFrontScorePose = new Pose(84, 84, toRadians(45));
     public static final Pose redBackScorePose = new Pose(84, 12, toRadians(68.2));
-    public static final Pose blueFrontScorePose = new Pose(144-84, 84, toRadians(180-45));
-    public static final Pose blueBackScorePose = new Pose(144-84, 12, toRadians(180-68.2));
-    public String allianceColor = "Red";
     public String scoringFrontBack = "Front";
     public Follower follower = Constants.createFollower(hardwareMap);
     public Pose scorePose = redFrontScorePose;
@@ -27,47 +27,25 @@ public class NewPrototypeTeleopPedroPathing extends NewPrototypeTeleop {
     @Override
     public void loop() {
         updatePose(follower);
-        if (gamepad1.dpad_right) allianceColor = "Red";
-        if (gamepad1.dpad_left) allianceColor = "Blue";
+
         if (gamepad1.dpad_up) scoringFrontBack = "Front";
         if (gamepad1.dpad_down) scoringFrontBack = "Back";
+        if (gamepad2.dpad_up) follower.setPose(new Pose(96, 60, 90));
+        if (gamepad2.dpad_down) follower.setPose(new Pose(108, 12, 90));
 
         // --- 1. Global Controls ---
         if (gamepad1.options) imu.resetYaw();
 
         // --- 2. Mode Selection ---
         isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
-        boolean isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
+        isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
         // Mechanism Power Control
-        if (isShootingMode) {
-            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
-            limelight.pipelineSwitch(PIPELINE_TAGS);
-        } else {
-            leftFlywheel.setVelocity(0);
-            rightFlywheel.setVelocity(0);
-            limelight.pipelineSwitch(PIPELINE_NEURAL);
-        }
+        shootingLogic();
 
         // Intake & Blocker Logic
-        if (isIntaking) {
-            intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
-            blockerServo.setPosition(BLOCKER_CLOSED);
-            blockerServo2.setPosition(BLOCKER_2_CLOSED);
-        } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
-            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
-            intakeMotor.setPower(INTAKE_SHOOTING_POWER);
-            blockerServo.setPosition(BLOCKER_OPEN);
-            blockerServo2.setPosition(BLOCKER_2_OPEN);
-            intakeMotor.setPower(0);
-        } else {
-            intakeMotor.setPower(0);
-            middleMotor.setPower(0);
-            blockerServo.setPosition(BLOCKER_CLOSED);
-            blockerServo2.setPosition(BLOCKER_2_CLOSED);
-        }
+        intakeLogic();
+
 
         // --- 3. Lift Logic (Operator Control) ---
         if (gamepad2.dpad_up) {
@@ -87,17 +65,12 @@ public class NewPrototypeTeleopPedroPathing extends NewPrototypeTeleop {
         double driveTurn = gamepad1.right_stick_x;
 
         if (isShootingMode) {
-            if (allianceColor.equals("Red")) {
-                if (scoringFrontBack.equals("Front")) scorePose = redFrontScorePose;
-                else scorePose = redBackScorePose;
-            } else {
-                if (scoringFrontBack.equals("Front")) scorePose = blueFrontScorePose;
-                else scorePose = blueBackScorePose;
-            }
+            if (scoringFrontBack.equals("Front")) scorePose = redFrontScorePose;
+            else scorePose = redBackScorePose;
             follower.holdPoint(scorePose);
         } else setMecanumPower(driveX, driveY, driveTurn);
 
-        telemetry.addData("PedroPathing score position", allianceColor + " " + scoringFrontBack);
+        telemetry.addData("PedroPathing score position", scoringFrontBack);
         // --- 5. Telemetry ---
         telemetry.addData("Mode", isShootingMode ? "SHOOTING" : (isIntaking ? "INTAKING" : "DRIVER"));
         telemetry.addData("Hood Pos", hoodServo.getPosition());
@@ -135,5 +108,42 @@ public class NewPrototypeTeleopPedroPathing extends NewPrototypeTeleop {
                     mt2.pose,
                     mt2.timestampSeconds);
         }*/
+    }
+    void shootingLogic() {
+        if (isShootingMode) {
+            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
+            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
+            limelight.pipelineSwitch(PIPELINE_MEGATAG);
+
+            if (gamepad1.left_bumper || gamepad2.left_bumper) { // Fire
+                middleMotor.setPower(MIDDLE_SHOOTING_POWER);
+                intakeMotor.setPower(INTAKE_SHOOTING_POWER);
+                blockerServo.setPosition(BLOCKER_OPEN);
+                blockerServo2.setPosition(BLOCKER_2_OPEN);
+            } else {
+                intakeMotor.setPower(0);
+                middleMotor.setPower(0);
+                blockerServo.setPosition(BLOCKER_CLOSED);
+                blockerServo2.setPosition(BLOCKER_2_CLOSED);
+            }
+        }
+        if (!isShootingMode){
+            leftFlywheel.setVelocity(0);
+            rightFlywheel.setVelocity(0);
+        }
+    }
+    void intakeLogic() {
+        if (isIntaking) {
+            intakeMotor.setPower(0.8);
+            middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
+            blockerServo.setPosition(BLOCKER_CLOSED);
+            blockerServo2.setPosition(BLOCKER_2_CLOSED);
+        }
+        else if (!isShootingMode){
+            intakeMotor.setPower(0);
+            middleMotor.setPower(0);
+            blockerServo.setPosition(BLOCKER_CLOSED);
+            blockerServo2.setPosition(BLOCKER_2_CLOSED);
+        }
     }
 }

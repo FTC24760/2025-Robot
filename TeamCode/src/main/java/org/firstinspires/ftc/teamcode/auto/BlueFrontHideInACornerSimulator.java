@@ -11,8 +11,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Blue Front Hide", group = "auto")
 public class BlueFrontHideInACornerSimulator extends AutoExample {
-    public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-225));
-    public static Pose scorePose = new Pose(144-84.000, 84.000, Math.toRadians(180-225));
+    public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-45));
     public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
 
     public static class Paths {
@@ -20,7 +19,7 @@ public class BlueFrontHideInACornerSimulator extends AutoExample {
 
         public Paths(Follower follower) {
             Path1 = new Path(new BezierLine(startPose, parkPose));
-            Path1.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
+            Path1.setLinearHeadingInterpolation(startPose.getHeading(), parkPose.getHeading());
 
         }
     }
