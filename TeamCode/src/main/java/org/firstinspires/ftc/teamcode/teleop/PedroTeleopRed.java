@@ -16,13 +16,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @TeleOp(name="Pedro TeleOp")
-public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
+public class PedroTeleopRed extends NewPrototypeTeleop {
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
-    public static final Pose redFrontScorePose = new Pose(84, 84, toRadians(45));
-    public static final Pose redBackScorePose = new Pose(84, 12, toRadians(68.2));
+    public static final Pose frontScorePose = new Pose(84, 84, toRadians(45));
+    public static final Pose backScorePose = new Pose(84, 12, toRadians(68.2));
     public String scoringFrontBack = "Front";
     public Follower follower;
-    public Pose scorePose = redFrontScorePose;
+    public Pose scorePose = frontScorePose;
     double flyWheelSpeed, intakeMotorSpeed, middleMotorSpeed;
     boolean isBlockerOpen;
     @Override
@@ -71,8 +71,8 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         double driveTurn = gamepad1.right_stick_x;
 
         if (isShootingMode) {
-            if (scoringFrontBack.equals("Front")) scorePose = redFrontScorePose;
-            else scorePose = redBackScorePose;
+            if (scoringFrontBack.equals("Front")) scorePose = frontScorePose;
+            else scorePose = backScorePose;
             follower.holdPoint(scorePose);
         } else setMecanumPower(driveX, driveY, driveTurn);
 
