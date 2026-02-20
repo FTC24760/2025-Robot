@@ -15,16 +15,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@TeleOp(name="Pedro TeleOp Red")
-public class PedroTeleopRed extends NewPrototypeTeleop {
+@TeleOp(name="Pedro TeleOp")
+public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
-    public static final Pose frontScorePose = new Pose(84, 84, toRadians(45));
-    public static final Pose backScorePose = new Pose(84, 12, toRadians(68.2));
+    public static final Pose redFrontScorePose = new Pose(84, 84, toRadians(45));
+    public static final Pose redBackScorePose = new Pose(84, 12, toRadians(68.2));
     public String scoringFrontBack = "Front";
-    public Follower follower = Constants.createFollower(hardwareMap);
-    public Pose scorePose = frontScorePose;
+    public Follower follower;
+    public Pose scorePose = redFrontScorePose;
     double flyWheelSpeed, intakeMotorSpeed, middleMotorSpeed;
     boolean isBlockerOpen;
+    @Override
+    public void init() {
+        super.init(); // from newprototypeteleop
+        follower = Constants.createFollower(hardwareMap);
+    }
+
     @Override
     public void loop() {
         updatePose(follower);
@@ -65,8 +71,8 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         double driveTurn = gamepad1.right_stick_x;
 
         if (isShootingMode) {
-            if (scoringFrontBack.equals("Front")) scorePose = frontScorePose;
-            else scorePose = backScorePose;
+            if (scoringFrontBack.equals("Front")) scorePose = redFrontScorePose;
+            else scorePose = redBackScorePose;
             follower.holdPoint(scorePose);
         } else setMecanumPower(driveX, driveY, driveTurn);
 
