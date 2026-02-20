@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.cos;
+import static java.lang.Math.hypot;
+import static java.lang.Math.signum;
 import static java.lang.Math.sin;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -32,7 +34,7 @@ public class NewPrototypeTeleop extends OpMode {
     public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
 
     // Added blockerServo2 and Lift Servos
-    public Servo hoodServo, blockerServo, blockerServo2;
+    public Servo hoodServo, blocker, blocker2;
     public CRServo liftLeft, liftRight;
 
     public IMU imu;
@@ -108,11 +110,11 @@ public class NewPrototypeTeleop extends OpMode {
         hoodServo = hardwareMap.get(Servo.class, "hood");
 
         // Blockers
-        blockerServo = hardwareMap.get(Servo.class, "blockerL");
-        blockerServo2 = hardwareMap.get(Servo.class, "blockerR");
+        blocker = hardwareMap.get(Servo.class, "blockerL");
+        blocker2 = hardwareMap.get(Servo.class, "blockerR");
 
-        blockerServo.setPosition(BLOCKER_CLOSED);
-        blockerServo2.setPosition(BLOCKER_2_CLOSED);
+        blocker.setPosition(BLOCKER_CLOSED);
+        blocker2.setPosition(BLOCKER_2_CLOSED);
 
         // Lift CR Servos
         liftLeft = hardwareMap.get(CRServo.class, "liftLeft");
@@ -163,8 +165,8 @@ public class NewPrototypeTeleop extends OpMode {
         rightFlywheel.setVelocity(0);
         intakeMotor.setPower(0);
         middleMotor.setPower(0);
-        blockerServo.setPosition(BLOCKER_CLOSED);
-        blockerServo2.setPosition(BLOCKER_2_CLOSED);
+        blocker.setPosition(BLOCKER_CLOSED);
+        blocker2.setPosition(BLOCKER_2_CLOSED);
 
         if (isShootingMode) {
             leftFlywheel.setVelocity(SHOOTER_VELOCITY);
@@ -173,8 +175,8 @@ public class NewPrototypeTeleop extends OpMode {
             if (gamepad1.left_bumper || gamepad2.left_bumper) { // Fire
                 middleMotor.setPower(MIDDLE_SHOOTING_POWER);
                 intakeMotor.setPower(INTAKE_SHOOTING_POWER);
-                blockerServo.setPosition(BLOCKER_OPEN);
-                blockerServo2.setPosition(BLOCKER_2_OPEN);
+                blocker.setPosition(BLOCKER_OPEN);
+                blocker2.setPosition(BLOCKER_2_OPEN);
             }
         }
 
@@ -251,12 +253,20 @@ public class NewPrototypeTeleop extends OpMode {
     }
 
     public void setMecanumPower(double strafe, double forward, double turn) {
+        double F_RATIO = 0.12;
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Field Centric Rotation
         double rotX = strafe * cos(-botHeading) - forward * sin(-botHeading);
         double rotY = strafe * sin(-botHeading) + forward * cos(-botHeading);
-
+        double hypotenuse = hypot(rotX, rotY);
+        if (hypotenuse > 0) {
+            rotX = (1 - F_RATIO) * rotX + F_RATIO * rotX / hypotenuse;
+            rotX = (1 - F_RATIO) * rotX + F_RATIO * rotX / hypotenuse;
+        }
+        else if (turn != 0) {
+            turn = (1 - F_RATIO) * turn + F_RATIO * signum(turn);
+        }
         double denominator = Math.max(abs(rotY) + abs(rotX) + abs(turn), 1);
         flDrive.setPower((rotY + rotX + turn) / denominator);
         rlDrive.setPower((rotY - rotX + turn) / denominator);

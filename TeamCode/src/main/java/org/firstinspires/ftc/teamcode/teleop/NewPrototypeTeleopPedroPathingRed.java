@@ -41,41 +41,27 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
         // Mechanism Power Control
-        leftFlywheel.setVelocity(0);
-        rightFlywheel.setVelocity(0);
-        intakeMotor.setPower(0);
-        middleMotor.setPower(0);
-        blockerServo.setPosition(BLOCKER_CLOSED);
-        blockerServo2.setPosition(BLOCKER_2_CLOSED);
+        resetMotors();
 
         if (isShootingMode) {
-            leftFlywheel.setVelocity(SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(SHOOTER_VELOCITY);
-            limelight.pipelineSwitch(PIPELINE_MEGATAG);
-            if (gamepad1.left_bumper || gamepad2.left_bumper) { // Fire
-                middleMotor.setPower(MIDDLE_SHOOTING_POWER);
-                intakeMotor.setPower(INTAKE_SHOOTING_POWER);
-                blockerServo.setPosition(BLOCKER_OPEN);
-                blockerServo2.setPosition(BLOCKER_2_OPEN);
-            }
+            shootingLogic(gamepad1.left_bumper || gamepad2.left_bumper);
         }
 
         if (isIntaking) {
-            intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
+            intakeLogic();
         }
 
 
         // --- 3. Lift Logic (Operator Control) ---
+        liftLeft.setPower(0);
+        liftRight.setPower(0);
         if (gamepad2.dpad_up) {
             liftLeft.setPower(LIFT_POWER);
             liftRight.setPower(LIFT_POWER);
-        } else if (gamepad2.dpad_down) {
+        }
+        if (gamepad2.dpad_down) {
             liftLeft.setPower(-LIFT_POWER);
             liftRight.setPower(-LIFT_POWER);
-        } else {
-            liftLeft.setPower(0);
-            liftRight.setPower(0);
         }
 
         // --- 4. Hybrid Drive & Auto Align/Hood Logic ---
@@ -127,5 +113,28 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
                     mt2.pose,
                     mt2.timestampSeconds);
         }*/
+    }
+    void resetMotors() {
+        leftFlywheel.setVelocity(0);
+        rightFlywheel.setVelocity(0);
+        intakeMotor.setPower(0);
+        middleMotor.setPower(0);
+        blocker.setPosition(BLOCKER_CLOSED);
+        blocker2.setPosition(BLOCKER_2_CLOSED);
+    }
+    void shootingLogic(boolean fire) {
+        leftFlywheel.setVelocity(SHOOTER_VELOCITY);
+        rightFlywheel.setVelocity(SHOOTER_VELOCITY);
+        limelight.pipelineSwitch(PIPELINE_MEGATAG);
+        if (fire) {
+            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
+            intakeMotor.setPower(INTAKE_SHOOTING_POWER);
+            blocker.setPosition(BLOCKER_OPEN);
+            blocker2.setPosition(BLOCKER_2_OPEN);
+        }
+    }
+    void intakeLogic() {
+        intakeMotor.setPower(0.8);
+        middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
     }
 }
