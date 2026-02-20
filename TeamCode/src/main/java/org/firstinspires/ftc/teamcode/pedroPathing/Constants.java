@@ -47,8 +47,8 @@ public class Constants {
             .yVelocity(54)
     ;
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-3.5) // vertical distance from horizontal center of robot
-            .strafePodX(-4.5) // horizontal distance from vertical center of robot
+            .forwardPodY(0) // vertical distance from horizontal center of robot
+            .strafePodX(2.5) // horizontal distance from vertical center of robot
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

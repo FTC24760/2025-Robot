@@ -29,13 +29,8 @@ public class RedBackScoring extends AutoExample {
 
     public static Pose parkPose = new Pose(108, 12, Math.toRadians(90));
 
-    public static double THRESHOLD = 1.0; // threshold for location thingy
-    public static double SPIN_TIME = 0.9;
     public static double SHOOTING_TIME = 2.0; //  time when the shooter is on PLUs the wait time
 
-
-    public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
-    public Servo hoodServo, blockerServo;
 
     public static class Paths {
         public static Path Path1, PathToIntake1, PathGrab1, PathScore1;

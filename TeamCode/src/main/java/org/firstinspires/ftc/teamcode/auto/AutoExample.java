@@ -2,23 +2,19 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.teleop.NewPrototypeTeleop;
-import org.firstinspires.ftc.teamcode.teleop.NewPrototypeTeleopPedroPathingRed;
-import org.firstinspires.ftc.teamcode.teleop.oldrobot.OldPrototypeTeleop;
+import org.firstinspires.ftc.teamcode.teleop.PedroTeleopRed;
 
 @Disabled
 @Autonomous(name = "Rear double score", group = "auto")
-public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
+public class AutoExample extends PedroTeleopRed {
     public static double THRESHOLD = 1.0; // threshold for location thingy
     Follower follower;
     public Timer pathTimer, actionTimer, opmodeTimer;
