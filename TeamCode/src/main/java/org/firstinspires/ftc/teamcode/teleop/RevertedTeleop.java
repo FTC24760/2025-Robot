@@ -42,9 +42,9 @@ public class RevertedTeleop extends OpMode {
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     public static final double SHOOTER_VELOCITY = 2000; // Overshoots at 2400
     // Shooter middle motor power - while shooting
-    public static final double MIDDLE_SHOOTING_POWER = 0.8;
+    public static final double MIDDLE_SHOOTING_POWER = 0.6;
     // Shooter intake motor power - while shooting
-    public static final double INTAKE_SHOOTING_POWER = 0.7;
+    public static final double INTAKE_SHOOTING_POWER = 0.9;
 
     // Blocker 1 Constants
     public static final double BLOCKER_OPEN = 0.0;
