@@ -6,9 +6,11 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+@Disabled
 @Autonomous(name = "Blue Single Score", group = "Auto")
 public class BlueFrontScoringSingle extends AutoExample {
    public static Pose startPose = new Pose(144-122, 122, Math.toRadians(135));

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.cos;
+import static java.lang.Math.hypot;
+import static java.lang.Math.signum;
 import static java.lang.Math.sin;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -247,16 +249,22 @@ public class NewPrototypeTeleop extends OpMode {
         telemetry.addData("Limelight TY", ty);
         telemetry.addData("Hood Pos", hoodServo.getPosition());
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
+        telemetry.addData("Gamepad left stick",  "x: %.3f, y: %.3f", gamepad1.left_stick_x, gamepad1.left_stick_y);
         telemetry.update();
     }
 
     public void setMecanumPower(double strafe, double forward, double turn) {
+        double FRICTION_RATIO = 0.1;
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Field Centric Rotation
         double rotX = strafe * cos(-botHeading) - forward * sin(-botHeading);
         double rotY = strafe * sin(-botHeading) + forward * cos(-botHeading);
-
+            double hypotenuse = hypot(rotX, rotY);
+        if (hypotenuse > 0) {
+            rotX = (rotX * (1 - FRICTION_RATIO)) + ((rotX / hypotenuse) * FRICTION_RATIO);
+            rotY = (rotY * (1 - FRICTION_RATIO)) + ((rotY / hypotenuse) * FRICTION_RATIO);
+        }
         double denominator = Math.max(abs(rotY) + abs(rotX) + abs(turn), 1);
         flDrive.setPower((rotY + rotX + turn) / denominator);
         rlDrive.setPower((rotY - rotX + turn) / denominator);

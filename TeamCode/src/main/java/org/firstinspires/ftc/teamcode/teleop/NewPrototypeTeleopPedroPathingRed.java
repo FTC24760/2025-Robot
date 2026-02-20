@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@TeleOp(name="Pedro TeleOp")
+@TeleOp(name="Pedro TeleOp Red")
 public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
     public static final Pose redFrontScorePose = new Pose(84, 84, toRadians(45));
@@ -30,8 +30,8 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
 
         if (gamepad1.dpad_up) scoringFrontBack = "Front";
         if (gamepad1.dpad_down) scoringFrontBack = "Back";
-        if (gamepad2.dpad_up) follower.setPose(new Pose(96, 60, 90));
-        if (gamepad2.dpad_down) follower.setPose(new Pose(108, 12, 90));
+        if (-gamepad1.right_stick_y > 0.8) follower.setPose(new Pose(96, 60, 90));
+        if (-gamepad1.right_stick_y < -0.8) follower.setPose(new Pose(108, 12, 90));
 
         // --- 1. Global Controls ---
         if (gamepad1.options) imu.resetYaw();
@@ -94,6 +94,9 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         telemetry.addData("Mode", isShootingMode ? "SHOOTING" : (isIntaking ? "INTAKING" : "DRIVER"));
         telemetry.addData("Hood Pos", hoodServo.getPosition());
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
+        telemetry.addData("xpose", follower.getPose().getX());
+        telemetry.addData("ypose", follower.getPose().getY());
+
         telemetry.update();
     }
     void updatePose(Follower follower) {
