@@ -55,6 +55,9 @@ public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
     @Override
     public void init() {
         initHardware();
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         actionTimer = new Timer();
@@ -62,10 +65,7 @@ public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
     }
     @Override
     public void start() {
-
         actionTimer.resetTimer();
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
         opmodeTimer.resetTimer();
         pathState = 0;
     }

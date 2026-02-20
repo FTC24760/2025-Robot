@@ -21,8 +21,14 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
     public static final Pose redFrontScorePose = new Pose(84, 84, toRadians(45));
     public static final Pose redBackScorePose = new Pose(84, 12, toRadians(68.2));
     public String scoringFrontBack = "Front";
-    public Follower follower = Constants.createFollower(hardwareMap);
+    public Follower follower;
     public Pose scorePose = redFrontScorePose;
+
+    @Override
+    public void init() {
+        super.init(); // from newprototypeteleop
+        follower = Constants.createFollower(hardwareMap);
+    }
 
     @Override
     public void loop() {
