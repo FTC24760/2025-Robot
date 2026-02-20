@@ -45,15 +45,7 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
     public void loop() {
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
-        switch (pathState) {
-            case 0:
-                follower.followPath(Paths.Path1);
-
-                break;
-            case 1:
-                break;
-        }
-        //follower.setPose(getRobotPoseFromCamera());
+        follower.followPath(Paths.Path1);
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());

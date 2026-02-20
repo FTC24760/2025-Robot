@@ -14,6 +14,7 @@ public class BlueFrontHideInACornerSimulator extends AutoExample {
     public static Pose startPose = new Pose(144-122, 122, Math.toRadians(180-45));
     public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
 
+
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 

@@ -82,7 +82,7 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
         telemetry.update();
     }
-    void updatePose(Follower follower) {
+    public void updatePose(Follower follower) {
         //limelight.updateRobotOrientation(imu.getRobotYawPitchRollAngles().getYaw());
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
         LLResult result = limelight.getLatestResult();
@@ -114,7 +114,7 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
                     mt2.timestampSeconds);
         }*/
     }
-    void resetMotors() {
+    public void resetMotors() {
         leftFlywheel.setVelocity(0);
         rightFlywheel.setVelocity(0);
         intakeMotor.setPower(0);
@@ -122,7 +122,7 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
         blocker.setPosition(BLOCKER_CLOSED);
         blocker2.setPosition(BLOCKER_2_CLOSED);
     }
-    void shootingLogic(boolean fire) {
+    public void shootingLogic(boolean fire) {
         leftFlywheel.setVelocity(SHOOTER_VELOCITY);
         rightFlywheel.setVelocity(SHOOTER_VELOCITY);
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
@@ -133,7 +133,7 @@ public class NewPrototypeTeleopPedroPathingRed extends NewPrototypeTeleop {
             blocker2.setPosition(BLOCKER_2_OPEN);
         }
     }
-    void intakeLogic() {
+    public void intakeLogic() {
         intakeMotor.setPower(0.8);
         middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
     }

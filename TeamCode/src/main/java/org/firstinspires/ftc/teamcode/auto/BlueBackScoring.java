@@ -124,8 +124,7 @@ public class BlueBackScoring extends AutoExample {
     }
 
     @Override
-    public void loop() {
-        follower.update();
+    void pathLogic() {
         switch (pathState) {
             case 0:
                 follower.followPath(Paths.Path1);
@@ -136,9 +135,8 @@ public class BlueBackScoring extends AutoExample {
                 break;
             case 1:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    runScoreLogic(false);
                     pathState = 2;
                 }
                 break;
@@ -151,7 +149,7 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 3:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab1);
                 if (isAtPose(intake1GrabPose)) {
                     pathState = 4;
@@ -159,7 +157,6 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 4:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore1);
                 if (isAtPose(scorePose)) {
                     pathState = 5;
@@ -168,9 +165,8 @@ public class BlueBackScoring extends AutoExample {
                 break;
             case 5:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    runScoreLogic(false);
                     pathState = 6;
                 }
                 break;
@@ -182,14 +178,13 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 7:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab2);
                 if (isAtPose(intake2GrabPose)) {
                     pathState = 8;
                 }
                 break;
             case 8:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore2);
                 if (isAtPose(scorePose)) {
                     pathState = 9;
@@ -198,9 +193,8 @@ public class BlueBackScoring extends AutoExample {
                 break;
             case 9:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    runScoreLogic(false);
                     pathState = 10;
                 }
                 break;
@@ -212,14 +206,13 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 11:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab3);
                 if (isAtPose(intake3GrabPose)) {
                     pathState = 12;
                 }
                 break;
             case 12:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore3);
                 if (isAtPose(scorePose)) {
                     pathState = 13;
@@ -228,9 +221,8 @@ public class BlueBackScoring extends AutoExample {
                 break;
             case 13:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    runScoreLogic(false);
                     pathState = 14;
                 }
                 break;
@@ -244,40 +236,6 @@ public class BlueBackScoring extends AutoExample {
             case 15:
                 follower.holdPoint(parkPose);
                 break;
-        }
-
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.update();
-    }
-
-    public void runScoreLogic(boolean active) {
-        if (active) {
-            leftFlywheel.setVelocity(FAR_SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(FAR_SHOOTER_VELOCITY);
-            if (actionTimer.getElapsedTimeSeconds() > SPIN_TIME) {
-                middleMotor.setPower(1.0);
-                blockerServo.setPosition(0.75);
-                intakeMotor.setPower(0);
-            }
-        } else {
-            leftFlywheel.setVelocity(0);
-            rightFlywheel.setVelocity(0);
-            middleMotor.setPower(0);
-            blockerServo.setPosition(1.0);
-        }
-    }
-
-    public void runIntakeLogic(boolean active) {
-        if (active) {
-            intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.3);
-            blockerServo.setPosition(1.0);
-        } else {
-            intakeMotor.setPower(0);
-            middleMotor.setPower(0);
         }
     }
 }

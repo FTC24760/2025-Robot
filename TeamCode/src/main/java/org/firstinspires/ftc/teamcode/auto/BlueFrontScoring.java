@@ -29,10 +29,6 @@ public class BlueFrontScoring extends AutoExample {
 
     public static Pose parkPose = new Pose(144-96, 60, Math.toRadians(180-90));
 
-    public static double THRESHOLD = 1.0; // threshold for location thingy
-
-    public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
-    public Servo hoodServo, blockerServo;
 
     public static class Paths {
         public static Path Path1, PathToIntake1, PathGrab1, PathScore1;
@@ -76,53 +72,12 @@ public class BlueFrontScoring extends AutoExample {
         }
     }
 
-    public void initHardware() {
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        middleMotor = hardwareMap.get(DcMotorEx.class, "middle");
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        middleMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        leftFlywheel = hardwareMap.get(DcMotorEx.class, "leftShooter");
-        rightFlywheel = hardwareMap.get(DcMotorEx.class, "rightShooter");
-
-        leftFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFlywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        hoodServo = hardwareMap.get(Servo.class, "hood");
-        blockerServo = hardwareMap.get(Servo.class, "blocker");
-        blockerServo.setPosition(1.0);
-    }
-
-    public boolean isAtPose(Pose target) {
-        double distance = Math.hypot(
-                follower.getPose().getX() - target.getX(),
-                follower.getPose().getY() - target.getY()
-        );
-        return distance < THRESHOLD;
-    }
-
-    @Override
-    public void init() {
-        initHardware();
-        pathTimer = new Timer();
-        opmodeTimer = new Timer();
-        actionTimer = new Timer();
-        Paths paths = new Paths(follower);
-    }
-    @Override
-    public void start() {
-
-        actionTimer.resetTimer();
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        opmodeTimer.resetTimer();
-        pathState = 0;
-    }
 
     @Override
     public void loop() {
         follower.update();
+        resetMotors();
         switch (pathState) {
             case 0:
                 follower.followPath(Paths.Path1);
@@ -133,9 +88,8 @@ public class BlueFrontScoring extends AutoExample {
                 break;
             case 1:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    runScoreLogic(false);
                     pathState = 2;
                 }
                 break;
@@ -148,7 +102,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 3:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab1);
                 if (isAtPose(intake1GrabPose)) {
                     pathState = 4;
@@ -156,7 +110,6 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 4:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore1);
                 if (isAtPose(scorePose)) {
                     pathState = 5;
@@ -165,9 +118,8 @@ public class BlueFrontScoring extends AutoExample {
                 break;
             case 5:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    runScoreLogic(false);
                     pathState = 6;
                 }
                 break;
@@ -179,14 +131,13 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 7:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab2);
                 if (isAtPose(intake2GrabPose)) {
                     pathState = 8;
                 }
                 break;
             case 8:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore2);
                 if (isAtPose(scorePose)) {
                     pathState = 9;
@@ -195,9 +146,8 @@ public class BlueFrontScoring extends AutoExample {
                 break;
             case 9:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    runScoreLogic(false);
                     pathState = 10;
                 }
                 break;
@@ -209,14 +159,13 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 11:
-                runIntakeLogic(true);
+                intakeLogic();
                 follower.followPath(Paths.PathGrab3);
                 if (isAtPose(intake3GrabPose)) {
                     pathState = 12;
                 }
                 break;
             case 12:
-                runIntakeLogic(false);
                 follower.followPath(Paths.PathScore3);
                 if (isAtPose(scorePose)) {
                     pathState = 13;
@@ -225,9 +174,8 @@ public class BlueFrontScoring extends AutoExample {
                 break;
             case 13:
                 follower.holdPoint(scorePose);
-                runScoreLogic(true);
+                shootingLogic(true);
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    runScoreLogic(false);
                     pathState = 14;
                 }
                 break;
@@ -248,33 +196,5 @@ public class BlueFrontScoring extends AutoExample {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
-    }
-
-    public void runScoreLogic(boolean active) {
-        if (active) {
-            leftFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
-            rightFlywheel.setVelocity(CLOSE_SHOOTER_VELOCITY);
-            if (actionTimer.getElapsedTimeSeconds() > 1.5) {
-                middleMotor.setPower(1.0);
-                blockerServo.setPosition(0.75);
-                intakeMotor.setPower(0);
-            }
-        } else {
-            leftFlywheel.setVelocity(0);
-            rightFlywheel.setVelocity(0);
-            middleMotor.setPower(0);
-            blockerServo.setPosition(1.0);
-        }
-    }
-
-    public void runIntakeLogic(boolean active) {
-        if (active) {
-            intakeMotor.setPower(0.8);
-            middleMotor.setPower(0.3);
-            blockerServo.setPosition(1.0);
-        } else {
-            intakeMotor.setPower(0);
-            middleMotor.setPower(0);
-        }
     }
 }
