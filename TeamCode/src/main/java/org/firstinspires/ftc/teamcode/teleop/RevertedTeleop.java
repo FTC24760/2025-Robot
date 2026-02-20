@@ -42,9 +42,9 @@ public class RevertedTeleop extends OpMode {
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     public static final double SHOOTER_VELOCITY = 2000; // Overshoots at 2400
     // Shooter middle motor power - while shooting
-    public static final double MIDDLE_SHOOTING_POWER = 0.6;
+    public static final double MIDDLE_SHOOTING_POWER = 0.8;
     // Shooter intake motor power - while shooting
-    public static final double INTAKE_SHOOTING_POWER = 0.9;
+    public static final double INTAKE_SHOOTING_POWER = 0.8;
 
     // Blocker 1 Constants
     public static final double BLOCKER_OPEN = 0.0;
@@ -176,8 +176,8 @@ public class RevertedTeleop extends OpMode {
             blockerServo.setPosition(BLOCKER_CLOSED);
             blockerServo2.setPosition(BLOCKER_2_CLOSED);
         } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
-            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
             intakeMotor.setPower(INTAKE_SHOOTING_POWER);
+            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
             blockerServo.setPosition(BLOCKER_OPEN);
             blockerServo2.setPosition(BLOCKER_2_OPEN);
             intakeMotor.setPower(0);
