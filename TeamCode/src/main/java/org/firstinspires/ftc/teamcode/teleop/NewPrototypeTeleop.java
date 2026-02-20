@@ -159,34 +159,28 @@ public class NewPrototypeTeleop extends OpMode {
         isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
         isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
 
-        // Mechanism Power Control
+        leftFlywheel.setVelocity(0);
+        rightFlywheel.setVelocity(0);
+        intakeMotor.setPower(0);
+        middleMotor.setPower(0);
+        blockerServo.setPosition(BLOCKER_CLOSED);
+        blockerServo2.setPosition(BLOCKER_2_CLOSED);
+
         if (isShootingMode) {
             leftFlywheel.setVelocity(SHOOTER_VELOCITY);
             rightFlywheel.setVelocity(SHOOTER_VELOCITY);
-            limelight.pipelineSwitch(PIPELINE_TAGS);
-        } else {
-            leftFlywheel.setVelocity(0);
-            rightFlywheel.setVelocity(0);
-            limelight.pipelineSwitch(PIPELINE_NEURAL);
+            limelight.pipelineSwitch(PIPELINE_MEGATAG);
+            if (gamepad1.left_bumper || gamepad2.left_bumper) { // Fire
+                middleMotor.setPower(MIDDLE_SHOOTING_POWER);
+                intakeMotor.setPower(INTAKE_SHOOTING_POWER);
+                blockerServo.setPosition(BLOCKER_OPEN);
+                blockerServo2.setPosition(BLOCKER_2_OPEN);
+            }
         }
 
-        // Intake & Blocker Logic
         if (isIntaking) {
             intakeMotor.setPower(0.8);
             middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
-            blockerServo.setPosition(BLOCKER_CLOSED);
-            blockerServo2.setPosition(BLOCKER_2_CLOSED);
-        } else if (isShootingMode && (gamepad1.left_bumper || gamepad2.left_bumper)) { // Fire
-            middleMotor.setPower(MIDDLE_SHOOTING_POWER);
-            intakeMotor.setPower(INTAKE_SHOOTING_POWER);
-            blockerServo.setPosition(BLOCKER_OPEN);
-            blockerServo2.setPosition(BLOCKER_2_OPEN);
-            intakeMotor.setPower(0);
-        } else {
-            intakeMotor.setPower(0);
-            middleMotor.setPower(0);
-            blockerServo.setPosition(BLOCKER_CLOSED);
-            blockerServo2.setPosition(BLOCKER_2_CLOSED);
         }
 
         // --- 3. Lift Logic (Operator Control) ---
