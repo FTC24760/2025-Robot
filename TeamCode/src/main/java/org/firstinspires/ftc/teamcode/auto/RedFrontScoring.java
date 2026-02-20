@@ -77,7 +77,7 @@ public class RedFrontScoring extends AutoExample {
     public void init() {
         super.startPose = this.startPose;
         super.init();
-        new Paths(follower);
+        myPaths = new Paths(follower);
     }
 
     @Override
