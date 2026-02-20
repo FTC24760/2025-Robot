@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class RedFrontHideInACornerSimulator extends AutoExample {
     public static Pose startPose = new Pose(122, 122, Math.toRadians(45));
     public static Pose parkPose = new Pose(96, 60, Math.toRadians(90));
-
+    Paths paths;
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
@@ -23,6 +23,13 @@ public class RedFrontHideInACornerSimulator extends AutoExample {
 
         }
     }
+    @Override
+    public void init() {
+        super.startPose = this.startPose;
+        super.init();
+        paths = new Paths(follower);
+    }
+
     @Override
     public void pathLogic() {
         follower.followPath(Paths.Path1);

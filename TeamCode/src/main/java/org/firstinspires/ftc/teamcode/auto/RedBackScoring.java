@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Back Score", group = "Auto")
 public class RedBackScoring extends AutoExample {
+    Paths paths;
     public static Pose startPose = new Pose(84, 8, Math.toRadians(90));
     public static Pose scorePose = new Pose(84.000, 12, Math.toRadians(58));
 
@@ -72,6 +73,12 @@ public class RedBackScoring extends AutoExample {
             PathPark = new Path(new BezierLine(scorePose, parkPose));
             PathPark.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
         }
+    }
+    @Override
+    public void init() {
+        super.startPose = this.startPose;
+        super.init();
+        paths = new Paths(follower);
     }
 
     @Override

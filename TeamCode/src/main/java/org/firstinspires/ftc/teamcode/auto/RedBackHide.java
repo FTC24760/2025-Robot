@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Blue Front Hide", group = "auto")
-public class BlueFrontHideInACornerSimulator extends AutoExample {
-    public static Pose startPose = new Pose(122, 122, Math.toRadians(45));
-    public static Pose parkPose = new Pose(96, 60, Math.toRadians(90));
+@Autonomous(name = "Red Back Hide", group = "auto")
+public class RedBackHide extends AutoExample {
+    public static Pose startPose = new Pose(84, 8, Math.toRadians(90));
+    public static Pose parkPose = new Pose(108, 12, Math.toRadians(90));
     Paths paths;
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
