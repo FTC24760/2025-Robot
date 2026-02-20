@@ -15,25 +15,27 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Front Score", group = "Auto")
 public class RedFrontScoring extends AutoExample {
-    public static Pose startPose = new Pose(122, 122, Math.toRadians(45));
-    public static Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(45));
+    public Pose startPose = new Pose(122, 122, Math.toRadians(45));
+    public Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(45));
 
-    public static Pose intake1Pose = new Pose(85, 84, Math.toRadians(0));
-    public static Pose intake1GrabPose = new Pose(116, 84, Math.toRadians(0));
+    public  Pose intake1Pose = new Pose(85, 84, Math.toRadians(0));
+    public  Pose intake1GrabPose = new Pose(116, 84, Math.toRadians(0));
 
-    public static Pose intake2Pose = new Pose(85, 60, Math.toRadians(0));
-    public static Pose intake2GrabPose = new Pose(118, 60, Math.toRadians(0));
+    public  Pose intake2Pose = new Pose(85, 60, Math.toRadians(0));
+    public  Pose intake2GrabPose = new Pose(118, 60, Math.toRadians(0));
 
-    public static Pose intake3Pose = new Pose(85, 36, Math.toRadians(0));
-    public static Pose intake3GrabPose = new Pose(120, 36, Math.toRadians(0));
+    public  Pose intake3Pose = new Pose(85, 36, Math.toRadians(0));
+    public  Pose intake3GrabPose = new Pose(120, 36, Math.toRadians(0));
 
-    public static Pose parkPose = new Pose(96, 60, Math.toRadians(90));
+    public  Pose parkPose = new Pose(96, 60, Math.toRadians(90));
 
-    public static class Paths {
-        public static Path Path1, PathToIntake1, PathGrab1, PathScore1;
-        public static Path PathToIntake2, PathGrab2, PathScore2;
-        public static Path PathToIntake3, PathGrab3, PathScore3;
-        public static Path PathPark;
+    public Paths myPaths;
+
+    public  class Paths {
+        public  Path Path1, PathToIntake1, PathGrab1, PathScore1;
+        public  Path PathToIntake2, PathGrab2, PathScore2;
+        public  Path PathToIntake3, PathGrab3, PathScore3;
+        public  Path PathPark;
 
         public Paths(Follower follower) {
             Path1 = new Path(new BezierLine(startPose, scorePose));
@@ -72,10 +74,17 @@ public class RedFrontScoring extends AutoExample {
     }
 
     @Override
+    public void init() {
+        super.startPose = this.startPose;
+        super.init();
+        new Paths(follower);
+    }
+
+    @Override
     public void pathLogic() {
         switch (pathState) {
             case 0:
-                follower.followPath(Paths.Path1);
+                follower.followPath(myPaths.Path1);
                 if (isAtPose(scorePose)) {
                     pathState = 1;
                     actionTimer.resetTimer();
@@ -89,7 +98,7 @@ public class RedFrontScoring extends AutoExample {
                 }
                 break;
             case 2:
-                follower.followPath(Paths.PathToIntake1);
+                follower.followPath(myPaths.PathToIntake1);
                 double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
                 if (headingError < 0.07) {
                     pathState = 3;
@@ -98,14 +107,14 @@ public class RedFrontScoring extends AutoExample {
                 break;
             case 3:
                 intakeLogic();
-                follower.followPath(Paths.PathGrab1);
+                follower.followPath(myPaths.PathGrab1);
                 if (isAtPose(intake1GrabPose)) {
                     pathState = 4;
                     actionTimer.resetTimer();
                 }
                 break;
             case 4:
-                follower.followPath(Paths.PathScore1);
+                follower.followPath(myPaths.PathScore1);
                 if (isAtPose(scorePose)) {
                     pathState = 5;
                     actionTimer.resetTimer();
@@ -119,7 +128,7 @@ public class RedFrontScoring extends AutoExample {
                 }
                 break;
             case 6:
-                follower.followPath(Paths.PathToIntake2);
+                follower.followPath(myPaths.PathToIntake2);
                 if (isAtPose(intake2Pose)) {
                     pathState = 7;
                     actionTimer.resetTimer();
@@ -127,13 +136,13 @@ public class RedFrontScoring extends AutoExample {
                 break;
             case 7:
                 intakeLogic();
-                follower.followPath(Paths.PathGrab2);
+                follower.followPath(myPaths.PathGrab2);
                 if (isAtPose(intake2GrabPose)) {
                     pathState = 8;
                 }
                 break;
             case 8:
-                follower.followPath(Paths.PathScore2);
+                follower.followPath(myPaths.PathScore2);
                 if (isAtPose(scorePose)) {
                     pathState = 9;
                     actionTimer.resetTimer();
@@ -147,7 +156,7 @@ public class RedFrontScoring extends AutoExample {
                 }
                 break;
             case 10:
-                follower.followPath(Paths.PathToIntake3);
+                follower.followPath(myPaths.PathToIntake3);
                 if (isAtPose(intake3Pose)) {
                     pathState = 11;
                     actionTimer.resetTimer();
@@ -155,13 +164,13 @@ public class RedFrontScoring extends AutoExample {
                 break;
             case 11:
                 intakeLogic();
-                follower.followPath(Paths.PathGrab3);
+                follower.followPath(myPaths.PathGrab3);
                 if (isAtPose(intake3GrabPose)) {
                     pathState = 12;
                 }
                 break;
             case 12:
-                follower.followPath(Paths.PathScore3);
+                follower.followPath(myPaths.PathScore3);
                 if (isAtPose(scorePose)) {
                     pathState = 13;
                     actionTimer.resetTimer();
@@ -175,7 +184,7 @@ public class RedFrontScoring extends AutoExample {
                 }
                 break;
             case 14:
-                follower.followPath(Paths.PathPark);
+                follower.followPath(myPaths.PathPark);
                 if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
                     pathState = 15;
                     actionTimer.resetTimer();

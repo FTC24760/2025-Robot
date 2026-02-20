@@ -25,10 +25,7 @@ public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
 
     public int pathState;
     Pose startPose;
-    public static class Paths {
-        Paths(Follower follower) {
-        }
-    }
+
     public void initHardware() {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
         middleMotor = hardwareMap.get(DcMotorEx.class, "middle");
@@ -61,7 +58,6 @@ public class AutoExample extends NewPrototypeTeleopPedroPathingRed {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         actionTimer = new Timer();
-        Paths paths = new Paths(follower);
     }
     @Override
     public void start() {
