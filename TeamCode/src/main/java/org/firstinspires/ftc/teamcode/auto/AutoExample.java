@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.auto;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleop.PedroTeleopRed;
@@ -31,9 +33,17 @@ public class AutoExample extends PedroTeleopRed {
         leftFlywheel = hardwareMap.get(DcMotorEx.class, "leftShooter");
         rightFlywheel = hardwareMap.get(DcMotorEx.class, "rightShooter");
 
+        blocker = hardwareMap.get(Servo.class, "blockerL");
+        blocker2 = hardwareMap.get(Servo.class, "blockerR");
+
+
         leftFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFlywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(PIPELINE_NEURAL);
+        limelight.start();
 
     }
 
