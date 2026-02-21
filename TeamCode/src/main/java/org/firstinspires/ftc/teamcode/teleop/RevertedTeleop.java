@@ -41,6 +41,7 @@ public class RevertedTeleop extends OpMode {
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
     public static final double SHOOTER_VELOCITY = 2000; // Overshoots at 2400
+    public static final double FAST_SHOOTER_VELOCITY = 2320;
     // Shooter middle motor power - while shooting
     public static final double MIDDLE_SHOOTING_POWER = 0.8;
     // Shooter intake motor power - while shooting
@@ -252,6 +253,7 @@ public class RevertedTeleop extends OpMode {
         telemetry.addData("Limelight TY", ty);
         telemetry.addData("Hood Pos", hoodServo.getPosition());
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
+        telemetry.addData("Target flywheel", SHOOTER_VELOCITY);
         telemetry.update();
     }
 

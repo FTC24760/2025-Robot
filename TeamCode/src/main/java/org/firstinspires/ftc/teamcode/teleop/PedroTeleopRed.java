@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static java.lang.Math.atan2;
+import static java.lang.Math.hypot;
 import static java.lang.Math.toRadians;
 
 import com.pedropathing.follower.Follower;
@@ -17,6 +19,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name="Pedro TeleOp")
 public class PedroTeleopRed extends NewPrototypeTeleop {
+    double a180(double angle) {
+        while (angle > toRadians(180)) angle -= toRadians(360);
+        while (angle < -180) angle += toRadians(360);
+        return angle;
+    }
+    double a360(double angle) {
+        while (angle > toRadians(360)) angle -= toRadians(360);
+        while (angle < 0) angle += toRadians(360);
+        return angle;
+    }
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
     public static final Pose frontScorePose = new Pose(84, 84, toRadians(45));
     public static final Pose backScorePose = new Pose(84, 12, toRadians(68.2));
@@ -70,7 +82,13 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         // --- 4. Hybrid Drive & Auto Align/Hood Logic ---
         double driveY = -gamepad1.left_stick_y;
         double driveX = gamepad1.left_stick_x * 1.1;
-        double driveTurn = gamepad1.right_stick_x;
+        double driveTurn;
+        if (hypot(gamepad1.right_stick_x, gamepad1.right_stick_y) > 0.1) {
+            double targetAngle = a360(atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x));
+            double botHeading = a360(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+            driveTurn = a180(targetAngle - botHeading) * 0.05;
+        }
+        else driveTurn = 0;
 
         if (isShootingMode) {
             if (scoringFrontBack.equals("Front")) scorePose = frontScorePose;
