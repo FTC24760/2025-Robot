@@ -85,13 +85,13 @@ public class AutoExample extends PedroTeleopRed {
         telemetry.update();
     }
     void pathLogic() {}
-    void tripleShoot(Timer pathTimer) {
+    void tripleShoot(Timer pathTimer, double flyWheelTargetSpeed) {
         if ((pathTimer.getElapsedTimeSeconds()%1) < 0.2) {
-            shootingLogic(true);
+            shootingLogic(true, flyWheelTargetSpeed);
 
         }
         else {
-            shootingLogic(false);
+            shootingLogic(false, flyWheelTargetSpeed);
             if ((pathTimer.getElapsedTimeSeconds()%1) > 0.3) {
                 middleMotor.setPower(MIDDLE_SHOOTING_POWER);
                 intakeMotor.setPower(INTAKE_SHOOTING_POWER);

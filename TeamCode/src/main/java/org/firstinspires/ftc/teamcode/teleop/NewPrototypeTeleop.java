@@ -34,7 +34,7 @@ public class NewPrototypeTeleop extends OpMode {
     public DcMotorEx intakeMotor, middleMotor, leftFlywheel, rightFlywheel;
 
     // Added blockerServo2 and Lift Servos
-    public Servo hoodServo, blocker, blocker2;
+    public Servo blocker, blocker2;
     public CRServo liftLeft, liftRight;
 
     public IMU imu;
@@ -48,7 +48,9 @@ public class NewPrototypeTeleop extends OpMode {
     // Shooter middle motor power - while shooting
     public static final double MIDDLE_SHOOTING_POWER = 0.8;
     // Shooter intake motor power - while shooting
-    public static final double INTAKE_SHOOTING_POWER = 0.7;
+    public static final double INTAKE_SHOOTING_POWER = 0.8;
+    public static final double INTAKE_INTAKING_POWER = 1.0;
+    public static final double MIDDLE_INTAKING_POWER = 1.0;
 
     // Blocker 1 Constants
     public static final double BLOCKER_OPEN = 0.0;
@@ -61,13 +63,6 @@ public class NewPrototypeTeleop extends OpMode {
     // Alignment Gain from your old code
     public static final double TURN_GAIN = 0.02;
     public static final double MAX_AUTO_TURN = 0.5;
-
-    // Hood Tuning Constants
-    // Equation: Hood Pos = HOOD_BASE + (Target_Y_Degrees * HOOD_GAIN)
-    public static final double HOOD_BASE = 0.3; // Starting position
-    public static final double HOOD_GAIN = 0.0035; // How much to move per degree of distance
-    public static final double HOOD_MIN = 0.3;   // Safety Clamp
-    public static final double HOOD_MAX = 1.0;   // Safety Clamp
 
     // Lift Power
     public static final double LIFT_POWER = 1.0;
@@ -108,8 +103,6 @@ public class NewPrototypeTeleop extends OpMode {
         leftFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFlywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        hoodServo = hardwareMap.get(Servo.class, "hood");
 
         // Blockers
         blocker = hardwareMap.get(Servo.class, "blockerL");
@@ -183,7 +176,7 @@ public class NewPrototypeTeleop extends OpMode {
         }
 
         if (isIntaking) {
-            intakeMotor.setPower(0.8);
+            intakeMotor.setPower(INTAKE_INTAKING_POWER);
             middleMotor.setPower(0.8); // Kept existing value, ensuring it runs
         }
 
@@ -217,14 +210,6 @@ public class NewPrototypeTeleop extends OpMode {
                     tx = tags.get(0).getTargetXDegrees();
                     ty = tags.get(0).getTargetYDegrees(); // Get distance info
                     targetFound = true;
-
-                    // --- Auto Hood Adjustment ---
-                    // Calculates position based on Y-angle (Distance)
-                    double calculatedHoodPos = HOOD_BASE + (ty * HOOD_GAIN);
-
-                    // Clamp to safety limits
-                    calculatedHoodPos = Math.max(HOOD_MIN, Math.min(HOOD_MAX, calculatedHoodPos));
-                    hoodServo.setPosition(calculatedHoodPos);
                 }
             } else if (isIntaking) {
                 // ALIGN TO GAME PIECE
@@ -249,7 +234,6 @@ public class NewPrototypeTeleop extends OpMode {
         telemetry.addData("Target Found", targetFound);
         telemetry.addData("Limelight TX", tx);
         telemetry.addData("Limelight TY", ty);
-        telemetry.addData("Hood Pos", hoodServo.getPosition());
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
         telemetry.update();
     }
@@ -265,9 +249,6 @@ public class NewPrototypeTeleop extends OpMode {
         if (hypotenuse > 0) {
             rotX = (1 - F_RATIO) * rotX + F_RATIO * rotX / hypotenuse;
             rotX = (1 - F_RATIO) * rotX + F_RATIO * rotX / hypotenuse;
-        }
-        else if (turn != 0) {
-            turn = (1 - F_RATIO) * turn + F_RATIO * signum(turn);
         }
         double denominator = Math.max(abs(rotY) + abs(rotX) + abs(turn), 1);
         flDrive.setPower((rotY + rotX + turn) / denominator);

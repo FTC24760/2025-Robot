@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Blue Front Score", group = "Auto")
 public class BlueFrontScoring extends AutoExample {
+    double flyWheelTargetSpeed = SHOOTER_VELOCITY;
     public Pose startPose = new Pose(144-122, 122, Math.toRadians(180-45));
     public Pose scorePose = new Pose(144-84.000, 84.000, Math.toRadians(180-45));
 
@@ -95,7 +96,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 2:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
                 if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
@@ -103,7 +104,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 3:
-                tripleShoot(actionTimer); // Score
+                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
                     follower.followPath(myPaths.PathToIntake1);
                     actionTimer.resetTimer();
@@ -133,7 +134,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 7:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
                 if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
@@ -141,7 +142,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 8:
-                tripleShoot(actionTimer); // Score
+                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
                     follower.followPath(myPaths.PathToIntake2);
                     pathState = 9;
@@ -169,7 +170,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 12:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
                 if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
@@ -177,7 +178,7 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 13:
-                tripleShoot(actionTimer); // Score
+                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
                     follower.followPath(myPaths.PathToIntake3);
                     pathState = 19;//14;
@@ -205,14 +206,14 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 17:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2.0) {
                     actionTimer.resetTimer();
                     pathState = 18;
                 }
                 break;
             case 18:
-                tripleShoot(actionTimer); // Score
+                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
                     follower.followPath(myPaths.PathPark);
                     actionTimer.resetTimer();

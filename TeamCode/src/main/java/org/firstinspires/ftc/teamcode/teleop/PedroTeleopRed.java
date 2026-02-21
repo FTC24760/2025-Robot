@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import static java.lang.Math.atan2;
 import static java.lang.Math.hypot;
+import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,28 +19,32 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+import com.bylazar.configurables.annotations.Configurable;
 @TeleOp(name="Pedro TeleOp")
 public class PedroTeleopRed extends NewPrototypeTeleop {
 
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
-    public static final Pose frontScorePose = new Pose(84, 84, toRadians(45));
-    public static final Pose backScorePose = new Pose(84, 12, toRadians(68.2));
-    public static final Pose frontAutoParkPose = new Pose(96, 60, toRadians(90));
-    public static final Pose backAutoParkPose = new Pose(108, 12, toRadians(90));
+    public static Pose frontScorePose = new Pose(84, 84, toRadians(45));
+    public static Pose backScorePose = new Pose(84, 12, toRadians(68.2));
+    public static Pose frontAutoParkPose = new Pose(96, 60, toRadians(90));
+    public static Pose backAutoParkPose = new Pose(108, 12, toRadians(90));
     public String scoringFrontBack = "Front";
     public Follower follower;
-    public Pose scorePose = frontScorePose;
     double flyWheelSpeed, intakeMotorSpeed, middleMotorSpeed;
     boolean isBlockerOpen;
+    Gamepad lastGamepad;
+    Timer actionTimer;
     @Override
     public void init() {
         super.init(); // from newprototypeteleop
         follower = Constants.createFollower(hardwareMap);
+        actionTimer = new Timer();
+        lastGamepad = gamepad1;
     }
 
     @Override
     public void loop() {
+        double flyWheelTargetSpeed = SHOOTER_VELOCITY;
         updatePose(follower);
 
         if (gamepad1.dpad_up) scoringFrontBack = "Front";
@@ -49,26 +56,34 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         if (gamepad1.options) imu.resetYaw();
 
         // --- 2. Mode Selection ---
-        isShootingMode = gamepad1.right_bumper || gamepad2.right_bumper;
-        isIntaking = (gamepad1.right_trigger > 0.1) || (gamepad2.right_trigger > 0.1);
+        isShootingMode = gamepad1.right_trigger > 0.1;
+        if (gamepad1.right_trigger > 0.9) flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
+        isIntaking = (gamepad1.right_bumper);
+
 
         // Mechanism Power Control
         resetMotors();
-        if (isShootingMode) shootingLogic(gamepad1.left_bumper || gamepad2.left_bumper);
+        if (isShootingMode) shootingLogic(gamepad1.left_bumper || gamepad2.left_bumper, flyWheelTargetSpeed);
+        if (gamepad1.left_trigger > 0.1) {
+            if (lastGamepad.left_trigger <= 0.1) actionTimer.resetTimer();
+            tripleShoot(actionTimer, flyWheelTargetSpeed);
+        }
+
         if (isIntaking) intakeLogic();
         updateMotors();
 
         // --- 3. Lift Logic (Operator Control) ---
         liftLeft.setPower(0);
         liftRight.setPower(0);
-        if (gamepad2.dpad_up) {
+        /*if (gamepad2.dpad_up) {
             liftLeft.setPower(LIFT_POWER);
             liftRight.setPower(LIFT_POWER);
         }
         if (gamepad2.dpad_down) {
             liftLeft.setPower(-LIFT_POWER);
             liftRight.setPower(-LIFT_POWER);
-        }
+        }*/
+
 
         // --- 4. Hybrid Drive & Auto Align/Hood Logic ---
         double driveY = -gamepad1.left_stick_y;
@@ -76,25 +91,30 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         double driveTurn;
         double targetAngle = 0; double botHeading = 0;
         if (hypot(gamepad1.right_stick_x, gamepad1.right_stick_y) > 0.1) {
-            targetAngle = a360(atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x));
+            targetAngle = a360(atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x)-toRadians(90));
             botHeading = a360(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-            driveTurn = a180(targetAngle - botHeading) * 0.05;
         }
-        else driveTurn = 0;
+        driveTurn = -a180(targetAngle - botHeading) * turnP.turn_P;
+        //driveTurn = gamepad1.right_stick_x;
 
-        if (isShootingMode) {
-            if (scoringFrontBack.equals("Front")) scorePose = frontScorePose;
-            else scorePose = backScorePose;
-            follower.holdPoint(scorePose);
-        } else setMecanumPower(driveX, driveY, driveTurn);
+        if (gamepad1.dpad_up || gamepad1.dpad_down) {
+            follower.update();
+            if (gamepad1.dpad_up && !lastGamepad.dpad_up) {
+                follower.holdPoint(frontScorePose);
+            }
+            if (gamepad1.dpad_down && !lastGamepad.dpad_down) {
+                follower.holdPoint(backScorePose);
+            }
+        }
+        else setMecanumPower(driveX, driveY, driveTurn);
 
         telemetry.addData("PedroPathing score position", scoringFrontBack);
         // --- 5. Telemetry ---
         telemetry.addData("Mode", isShootingMode ? "SHOOTING" : (isIntaking ? "INTAKING" : "DRIVER"));
-        telemetry.addData("Hood Pos", hoodServo.getPosition());
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
-        telemetry.addData("Target angle", targetAngle);
-        telemetry.addData("Bot Heading", botHeading);
+        telemetry.addData("Target angle", toDegrees(targetAngle));
+        telemetry.addData("Bot Heading", toDegrees(botHeading));
+        telemetry.addData("Drive TUrn", driveTurn);
         telemetry.update();
     }
     public void updatePose(Follower follower) {
@@ -135,7 +155,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         middleMotorSpeed = 0;
         isBlockerOpen = false;
     }
-    public void shootingLogic(boolean fire) {
+    public void shootingLogic(boolean fire, double flyWheelTargetSpeed) {
         flyWheelSpeed = SHOOTER_VELOCITY;
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
         if (fire) {
@@ -172,5 +192,22 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         while (angle > toRadians(360)) angle -= toRadians(360);
         while (angle < 0) angle += toRadians(360);
         return angle;
+    }
+    void tripleShoot(Timer pathTimer, double flyWheelTargetSpeed) {
+        if ((pathTimer.getElapsedTimeSeconds()%1) < 0.2) {
+            shootingLogic(true, flyWheelTargetSpeed);
+        }
+        else {
+            shootingLogic(false, flyWheelTargetSpeed);
+            if ((pathTimer.getElapsedTimeSeconds()%1) > 0.3) {
+                middleMotorSpeed = MIDDLE_SHOOTING_POWER;
+                intakeMotorSpeed = INTAKE_SHOOTING_POWER;
+            }
+        }
+    }
+
+    @Configurable
+    static class turnP {
+        public static double turn_P = 1;
     }
 }

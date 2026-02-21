@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Blue Back Score", group = "Auto")
 public class BlueBackScoring extends AutoExample {
+    double flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
     Paths paths;
     public static Pose startPose = new Pose(144-84, 8, Math.toRadians(180-90));
     public static Pose scorePose = new Pose(144-84.000, 12, Math.toRadians(180-58));
@@ -95,14 +96,14 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 2:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(true, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2.0) {
                     actionTimer.resetTimer();
                     pathState = 3;
                 }
                 break;
             case 3:
-                shootingLogic(true); // Score
+                shootingLogic(true, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
                     follower.followPath(Paths.PathToIntake1);
                     actionTimer.resetTimer();
@@ -136,14 +137,14 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 7:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(true, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2.0) {
                     actionTimer.resetTimer();
                     pathState = 8;
                 }
                 break;
             case 8:
-                shootingLogic(true); // Score
+                shootingLogic(true, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
                     follower.followPath(Paths.PathToIntake2);
                     actionTimer.resetTimer();
@@ -177,14 +178,14 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 12:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(true, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2.0) {
                     actionTimer.resetTimer();
                     pathState = 13;
                 }
                 break;
             case 13:
-                shootingLogic(true); // Score
+                shootingLogic(true, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
                     follower.followPath(Paths.PathToIntake3);
                     pathState = 14;
@@ -215,14 +216,14 @@ public class BlueBackScoring extends AutoExample {
                 }
                 break;
             case 17:
-                shootingLogic(false); // Spin up flywheels
+                shootingLogic(true, flyWheelTargetSpeed); // Spin up flywheels
                 if (actionTimer.getElapsedTimeSeconds() > 2.0) {
                     actionTimer.resetTimer();
                     pathState = 18;
                 }
                 break;
             case 18:
-                shootingLogic(true); // Score
+                shootingLogic(true, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
                     follower.followPath(Paths.PathPark);
                     actionTimer.resetTimer();
