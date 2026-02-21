@@ -81,9 +81,23 @@ public class AutoExample extends PedroTeleopRed {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("Shooter velocity", leftFlywheel.getVelocity());
         telemetry.update();
     }
     void pathLogic() {}
+    void tripleShoot(Timer pathTimer) {
+        if ((pathTimer.getElapsedTimeSeconds()%1) < 0.2) {
+            shootingLogic(true);
+
+        }
+        else {
+            shootingLogic(false);
+            if ((pathTimer.getElapsedTimeSeconds()%1) > 0.3) {
+                middleMotor.setPower(MIDDLE_SHOOTING_POWER);
+                intakeMotor.setPower(INTAKE_SHOOTING_POWER);
+            }
+        }
+    }
 
 }
 

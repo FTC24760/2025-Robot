@@ -133,7 +133,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         }
     }
     public void intakeLogic() {
-        intakeMotorSpeed = 0.8;
+        intakeMotorSpeed = 1;
         middleMotorSpeed = 0.8;
     }
     public void updateMotors() {

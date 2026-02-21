@@ -105,6 +105,7 @@ public class BlueBackScoring extends AutoExample {
                 shootingLogic(true); // Score
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
                     follower.followPath(Paths.PathToIntake1);
+                    actionTimer.resetTimer();
                     pathState = 4;
                 }
                 break;
@@ -112,6 +113,7 @@ public class BlueBackScoring extends AutoExample {
                 double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
                 if (headingError < 0.07 || !follower.isBusy()) {
                     follower.followPath(Paths.PathGrab1);
+                    actionTimer.resetTimer();
                     pathState = 5;
                 }
                 break;
@@ -120,10 +122,13 @@ public class BlueBackScoring extends AutoExample {
 
                 if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
                     follower.followPath(Paths.PathScore1);
+                    actionTimer.resetTimer();
                     pathState = 6;
                 }
                 break;
             case 6:
+                if (actionTimer.getElapsedTimeSeconds() < 0.5)
+                    intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();
@@ -141,12 +146,14 @@ public class BlueBackScoring extends AutoExample {
                 shootingLogic(true); // Score
                 if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
                     follower.followPath(Paths.PathToIntake2);
+                    actionTimer.resetTimer();
                     pathState = 9;
                 }
                 break;
             case 9:
                 if (isAtPose(intake2Pose) || !follower.isBusy()) {
                     follower.followPath(Paths.PathGrab2);
+                    actionTimer.resetTimer();
                     pathState = 10;
                 }
                 break;
@@ -156,9 +163,13 @@ public class BlueBackScoring extends AutoExample {
                 if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
                     follower.followPath(Paths.PathScore2);
                     pathState = 11;
+                    actionTimer.resetTimer();
                 }
                 break;
             case 11:
+
+                if (actionTimer.getElapsedTimeSeconds() < 0.5)
+                    intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();
@@ -190,10 +201,13 @@ public class BlueBackScoring extends AutoExample {
 
                 if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
                     follower.followPath(Paths.PathScore3);
+                    actionTimer.resetTimer();
                     pathState = 16;
                 }
                 break;
             case 16:
+                if (actionTimer.getElapsedTimeSeconds() < 0.5)
+                    intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();
