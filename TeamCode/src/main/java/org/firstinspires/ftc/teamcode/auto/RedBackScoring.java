@@ -15,28 +15,27 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Red Back Score", group = "Auto")
 public class RedBackScoring extends AutoExample {
-    Paths paths;
-    public static Pose startPose = new Pose(84, 8, Math.toRadians(90));
-    public static Pose scorePose = new Pose(84.000, 12, Math.toRadians(58));
+    public Pose startPose = new Pose(84, 8, Math.toRadians(90));
+    public Pose scorePose = new Pose(84.000, 12, Math.toRadians(66));
 
-    public static Pose intake3Pose = new Pose(85, 84, Math.toRadians(0));
-    public static Pose intake3GrabPose = new Pose(116, 84, Math.toRadians(0));
+    public  Pose intake1Pose = new Pose(85, 36, Math.toRadians(0));
+    public  Pose intake1GrabPose = new Pose(126, 36, Math.toRadians(0));
 
-    public static Pose intake2Pose = new Pose(85, 60, Math.toRadians(0));
-    public static Pose intake2GrabPose = new Pose(118, 60, Math.toRadians(0));
+    public  Pose intake2Pose = new Pose(85, 60, Math.toRadians(0));
+    public  Pose intake2GrabPose = new Pose(126, 60, Math.toRadians(0));
 
-    public static Pose intake1Pose = new Pose(85, 36, Math.toRadians(0));
-    public static Pose intake1GrabPose = new Pose(120, 36, Math.toRadians(0));
+    public  Pose intake3Pose = new Pose(85, 84, Math.toRadians(0));
+    public  Pose intake3GrabPose = new Pose(126, 84, Math.toRadians(0));
 
-    public static Pose parkPose = new Pose(108, 12, Math.toRadians(90));
+    public  Pose parkPose = new Pose(108, 12, Math.toRadians(90));
 
-    public static double SHOOTING_TIME = 2.0; // time when the shooter is on PLUS the wait time
+    public Paths myPaths;
 
-    public static class Paths {
-        public static Path Path1, PathToIntake1, PathGrab1, PathScore1;
-        public static Path PathToIntake2, PathGrab2, PathScore2;
-        public static Path PathToIntake3, PathGrab3, PathScore3;
-        public static Path PathPark;
+    public  class Paths {
+        public  Path Path1, PathToIntake1, PathGrab1, PathScore1;
+        public  Path PathToIntake2, PathGrab2, PathScore2;
+        public  Path PathToIntake3, PathGrab3, PathScore3;
+        public  Path PathPark;
 
         public Paths(Follower follower) {
             Path1 = new Path(new BezierLine(startPose, scorePose));
@@ -73,18 +72,19 @@ public class RedBackScoring extends AutoExample {
             PathPark.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
         }
     }
+
     @Override
     public void init() {
         super.startPose = this.startPose;
         super.init();
-        paths = new Paths(follower);
+        myPaths = new Paths(follower);
     }
 
     @Override
     public void pathLogic() {
         switch (pathState) {
             case 0:
-                follower.followPath(Paths.Path1);
+                follower.followPath(myPaths.Path1);
                 pathState = 1;
                 break;
             case 1:
@@ -96,31 +96,32 @@ public class RedBackScoring extends AutoExample {
                 break;
             case 2:
                 shootingLogic(false); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
+                if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
                     pathState = 3;
                 }
                 break;
             case 3:
-                shootingLogic(true); // Score
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    follower.followPath(Paths.PathToIntake1);
+                tripleShoot(actionTimer); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 2.2) {
+                    follower.followPath(myPaths.PathToIntake1);
+                    actionTimer.resetTimer();
                     pathState = 4;
                 }
                 break;
             case 4:
                 double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
                 if (headingError < 0.07 || !follower.isBusy()) {
-                    follower.followPath(Paths.PathGrab1);
+                    follower.followPath(myPaths.PathGrab1);
                     pathState = 5;
                 }
                 break;
             case 5:
                 intakeLogic();
 
-
                 if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
-                    follower.followPath(Paths.PathScore1);
+                    follower.followPath(myPaths.PathScore1);
                     pathState = 6;
                 }
                 break;
@@ -133,30 +134,30 @@ public class RedBackScoring extends AutoExample {
                 break;
             case 7:
                 shootingLogic(false); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
+                if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
                     pathState = 8;
                 }
                 break;
             case 8:
-                shootingLogic(true); // Score
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    follower.followPath(Paths.PathToIntake2);
+                tripleShoot(actionTimer); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 2.2) {
+                    follower.followPath(myPaths.PathToIntake2);
                     pathState = 9;
                 }
                 break;
             case 9:
                 if (isAtPose(intake2Pose) || !follower.isBusy()) {
-                    follower.followPath(Paths.PathGrab2);
+                    follower.followPath(myPaths.PathGrab2);
                     pathState = 10;
                 }
                 break;
             case 10:
                 intakeLogic();
 
-
                 if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
-                    follower.followPath(Paths.PathScore2);
+                    follower.followPath(myPaths.PathScore2);
                     pathState = 11;
                 }
                 break;
@@ -169,30 +170,30 @@ public class RedBackScoring extends AutoExample {
                 break;
             case 12:
                 shootingLogic(false); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
+                if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
                     pathState = 13;
                 }
                 break;
             case 13:
-                shootingLogic(true); // Score
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
-                    follower.followPath(Paths.PathToIntake3);
-                    pathState = 14;
+                tripleShoot(actionTimer); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 2.2) {
+                    follower.followPath(myPaths.PathToIntake3);
+                    pathState = 19;//14;
                 }
                 break;
             case 14:
                 if (isAtPose(intake3Pose) || !follower.isBusy()) {
-                    follower.followPath(Paths.PathGrab3);
+                    follower.followPath(myPaths.PathGrab3);
                     pathState = 15;
                 }
                 break;
             case 15:
                 intakeLogic();
 
-
                 if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
-                    follower.followPath(Paths.PathScore3);
+                    follower.followPath(myPaths.PathScore3);
                     pathState = 16;
                 }
                 break;
@@ -211,9 +212,9 @@ public class RedBackScoring extends AutoExample {
                 }
                 break;
             case 18:
-                shootingLogic(true); // Score
+                tripleShoot(actionTimer); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(Paths.PathPark);
+                    follower.followPath(myPaths.PathPark);
                     actionTimer.resetTimer();
                     pathState = 19;
                 }
