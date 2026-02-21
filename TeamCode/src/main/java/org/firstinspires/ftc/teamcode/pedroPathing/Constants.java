@@ -21,7 +21,7 @@ public class Constants {
             //.lateralZeroPowerAcceleration(-60)
             .forwardZeroPowerAcceleration(-42.53)
             .lateralZeroPowerAcceleration(-67.93)
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0.0002, 0.0005, 0.6, 0.01));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0.0001, 0.0005, 0.6, 0.01));
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 

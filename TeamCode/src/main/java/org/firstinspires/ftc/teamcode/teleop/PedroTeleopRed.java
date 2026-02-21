@@ -127,7 +127,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         flyWheelSpeed = SHOOTER_VELOCITY;
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
         if (fire) {
-            middleMotorSpeed = MIDDLE_SHOOTING_POWER;
+            middleMotorSpeed = 1.0;
             intakeMotorSpeed = INTAKE_SHOOTING_POWER;
             isBlockerOpen = true;
         }
