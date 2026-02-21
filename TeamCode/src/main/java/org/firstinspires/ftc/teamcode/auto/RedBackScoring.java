@@ -86,114 +86,113 @@ public class RedBackScoring extends AutoExample {
         switch (pathState) {
             case 0:
                 follower.followPath(Paths.Path1);
-                if (isAtPose(scorePose)) {
-                    pathState = 1;
-                    actionTimer.resetTimer();
-                }
+                pathState = 1;
                 break;
             case 1:
-                follower.holdPoint(scorePose);
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 2;
                 }
                 break;
             case 2:
-                follower.followPath(Paths.PathToIntake1);
-                double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
-                if (headingError < 0.07) {
+                shootingLogic(true);
+                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                    follower.followPath(Paths.PathToIntake1);
                     pathState = 3;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 3:
-                intakeLogic();
-                follower.followPath(Paths.PathGrab1);
-                if (isAtPose(intake1GrabPose)) {
+                double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
+                if (headingError < 0.07 || !follower.isBusy()) {
+                    intakeLogic();
+                    follower.followPath(Paths.PathGrab1);
                     pathState = 4;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 4:
-                follower.followPath(Paths.PathScore1);
-                if (isAtPose(scorePose)) {
+                if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
+                    follower.followPath(Paths.PathScore1);
                     pathState = 5;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 5:
-                follower.holdPoint(scorePose);
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 6;
                 }
                 break;
             case 6:
-                follower.followPath(Paths.PathToIntake2);
-                if (isAtPose(intake2Pose)) {
+                shootingLogic(true);
+                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                    follower.followPath(Paths.PathToIntake2);
                     pathState = 7;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 7:
-                intakeLogic();
-                follower.followPath(Paths.PathGrab2);
-                if (isAtPose(intake2GrabPose)) {
+                if (isAtPose(intake2Pose) || !follower.isBusy()) {
+                    intakeLogic();
+                    follower.followPath(Paths.PathGrab2);
                     pathState = 8;
                 }
                 break;
             case 8:
-                follower.followPath(Paths.PathScore2);
-                if (isAtPose(scorePose)) {
+                if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
+                    follower.followPath(Paths.PathScore2);
                     pathState = 9;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 9:
-                follower.holdPoint(scorePose);
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 10;
                 }
                 break;
             case 10:
-                follower.followPath(Paths.PathToIntake3);
-                if (isAtPose(intake3Pose)) {
+                shootingLogic(true);
+                if (actionTimer.getElapsedTimeSeconds() > SHOOTING_TIME) {
+                    follower.followPath(Paths.PathToIntake3);
                     pathState = 11;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 11:
-                intakeLogic();
-                follower.followPath(Paths.PathGrab3);
-                if (isAtPose(intake3GrabPose)) {
+                if (isAtPose(intake3Pose) || !follower.isBusy()) {
+                    intakeLogic();
+                    follower.followPath(Paths.PathGrab3);
                     pathState = 12;
                 }
                 break;
             case 12:
-
-                follower.followPath(Paths.PathScore3);
-                if (isAtPose(scorePose)) {
+                if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
+                    follower.followPath(Paths.PathScore3);
                     pathState = 13;
-                    actionTimer.resetTimer();
                 }
                 break;
             case 13:
-                follower.holdPoint(scorePose);
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 14;
                 }
                 break;
             case 14:
-                follower.followPath(Paths.PathPark);
-                if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
-                    pathState = 15;
+                shootingLogic(true);
+                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(Paths.PathPark);
                     actionTimer.resetTimer();
+                    pathState = 15;
                 }
                 break;
             case 15:
-                follower.holdPoint(parkPose);
+                if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
+                    follower.holdPoint(parkPose);
+                    pathState = 16;
+                }
+                break;
+            case 16:
+                // Auto sequence finished
                 break;
         }
     }

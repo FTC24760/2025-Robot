@@ -14,6 +14,7 @@ public class RedBackHide extends AutoExample {
     public static Pose startPose = new Pose(84, 8, Math.toRadians(90));
     public static Pose parkPose = new Pose(108, 12, Math.toRadians(90));
     Paths paths;
+
     public static class Paths {
         public static Path Path1, Path2, Path3, Path4, Path5, Path6, Path7;
 
@@ -23,6 +24,7 @@ public class RedBackHide extends AutoExample {
 
         }
     }
+
     @Override
     public void init() {
         super.startPose = this.startPose;
@@ -32,6 +34,20 @@ public class RedBackHide extends AutoExample {
 
     @Override
     public void pathLogic() {
-        follower.followPath(Paths.Path1);
+        switch(pathState) {
+            case 0:
+                follower.followPath(Paths.Path1);
+                pathState = 1;
+                break;
+            case 1:
+                if (!follower.isBusy()) {
+                    follower.holdPoint(parkPose);
+                    pathState = 2;
+                }
+                break;
+            case 2:
+                // Finished
+                break;
+        }
     }
 }
