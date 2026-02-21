@@ -95,102 +95,134 @@ public class BlueFrontScoring extends AutoExample {
                 }
                 break;
             case 2:
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(myPaths.PathToIntake1);
+                shootingLogic(false); // Spin up flywheels
+                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                    actionTimer.resetTimer();
                     pathState = 3;
                 }
                 break;
             case 3:
-                double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
-                if (headingError < 0.07 || !follower.isBusy()) {
-                    intakeLogic();
-                    follower.followPath(myPaths.PathGrab1);
+                shootingLogic(true); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(myPaths.PathToIntake1);
                     pathState = 4;
                 }
                 break;
             case 4:
-                if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathScore1);
+                double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
+                if (headingError < 0.07 || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathGrab1);
                     pathState = 5;
                 }
                 break;
             case 5:
-                if (isAtPose(scorePose) || !follower.isBusy()) {
-                    follower.holdPoint(scorePose);
-                    actionTimer.resetTimer();
+                intakeLogic();
+
+                if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathScore1);
                     pathState = 6;
                 }
                 break;
             case 6:
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(myPaths.PathToIntake2);
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 7;
                 }
                 break;
             case 7:
-                if (isAtPose(intake2Pose) || !follower.isBusy()) {
-                    intakeLogic();
-                    follower.followPath(myPaths.PathGrab2);
+                shootingLogic(false); // Spin up flywheels
+                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                    actionTimer.resetTimer();
                     pathState = 8;
                 }
                 break;
             case 8:
-                if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathScore2);
+                shootingLogic(true); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(myPaths.PathToIntake2);
                     pathState = 9;
                 }
                 break;
             case 9:
-                if (isAtPose(scorePose) || !follower.isBusy()) {
-                    follower.holdPoint(scorePose);
-                    actionTimer.resetTimer();
+                if (isAtPose(intake2Pose) || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathGrab2);
                     pathState = 10;
                 }
                 break;
             case 10:
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(myPaths.PathToIntake3);
+                intakeLogic();
+
+
+                if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathScore2);
                     pathState = 11;
                 }
                 break;
             case 11:
-                if (isAtPose(intake3Pose) || !follower.isBusy()) {
-                    intakeLogic();
-                    follower.followPath(myPaths.PathGrab3);
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
                     pathState = 12;
                 }
                 break;
             case 12:
-                if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathScore3);
+                shootingLogic(false); // Spin up flywheels
+                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                    actionTimer.resetTimer();
                     pathState = 13;
                 }
                 break;
             case 13:
-                if (isAtPose(scorePose) || !follower.isBusy()) {
-                    follower.holdPoint(scorePose);
-                    actionTimer.resetTimer();
+                shootingLogic(true); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(myPaths.PathToIntake3);
                     pathState = 14;
                 }
                 break;
             case 14:
-                shootingLogic(true);
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(myPaths.PathPark);
-                    actionTimer.resetTimer();
+                if (isAtPose(intake3Pose) || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathGrab3);
                     pathState = 15;
                 }
                 break;
             case 15:
-                if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
-                    follower.holdPoint(parkPose);
+                intakeLogic();
+
+                if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
+                    follower.followPath(myPaths.PathScore3);
                     pathState = 16;
                 }
                 break;
             case 16:
+                if (isAtPose(scorePose) || !follower.isBusy()) {
+                    follower.holdPoint(scorePose);
+                    actionTimer.resetTimer();
+                    pathState = 17;
+                }
+                break;
+            case 17:
+                shootingLogic(false); // Spin up flywheels
+                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
+                    actionTimer.resetTimer();
+                    pathState = 18;
+                }
+                break;
+            case 18:
+                shootingLogic(true); // Score
+                if (actionTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(myPaths.PathPark);
+                    actionTimer.resetTimer();
+                    pathState = 19;
+                }
+                break;
+            case 19:
+                if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
+                    follower.holdPoint(parkPose);
+                    pathState = 20;
+                }
+                break;
+            case 20:
                 // Auto sequence finished
                 break;
         }
