@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Autonomous(name = "Red Back Score", group = "Auto")
 public class RedBackScoring extends AutoExample {
     double flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
-    public Pose startPose = new Pose(84, 8, Math.toRadians(90));
+    public Pose startPose = new Pose(84, 4, Math.toRadians(90));
     public Pose scorePose = new Pose(84.000, 12, Math.toRadians(66));
 
     public  Pose intake1Pose = new Pose(85, 36, Math.toRadians(0));
@@ -144,84 +144,6 @@ public class RedBackScoring extends AutoExample {
             case 8:
                 tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
-                    follower.followPath(myPaths.PathToIntake2);
-                    pathState = 9;
-                }
-                break;
-            case 9:
-                if (isAtPose(intake2Pose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathGrab2);
-                    pathState = 10;
-                }
-                break;
-            case 10:
-                intakeLogic();
-
-                if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathScore2);
-                    pathState = 11;
-                }
-                break;
-            case 11:
-                if (isAtPose(scorePose) || !follower.isBusy()) {
-                    follower.holdPoint(scorePose);
-                    actionTimer.resetTimer();
-                    pathState = 12;
-                }
-                break;
-            case 12:
-                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
-                if (actionTimer.getElapsedTimeSeconds() > 2.5) {
-                    actionTimer.resetTimer();
-                    pathState = 13;
-                }
-                break;
-            case 13:
-                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
-                if (actionTimer.getElapsedTimeSeconds() > 2.2) {
-                    follower.followPath(myPaths.PathToIntake3);
-                    pathState = 19;//14;
-                }
-                break;
-            case 14:
-                if (isAtPose(intake3Pose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathGrab3);
-                    pathState = 15;
-                }
-                break;
-            case 15:
-                intakeLogic();
-
-                if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
-                    follower.followPath(myPaths.PathScore3);
-                    pathState = 16;
-                }
-                break;
-            case 16:
-                if (isAtPose(scorePose) || !follower.isBusy()) {
-                    follower.holdPoint(scorePose);
-                    actionTimer.resetTimer();
-                    pathState = 17;
-                }
-                break;
-            case 17:
-                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2.0) {
-                    actionTimer.resetTimer();
-                    pathState = 18;
-                }
-                break;
-            case 18:
-                tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
-                if (actionTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(myPaths.PathPark);
-                    actionTimer.resetTimer();
-                    pathState = 19;
-                }
-                break;
-            case 19:
-                if (!follower.isBusy() || actionTimer.getElapsedTimeSeconds() > 5) {
                     follower.holdPoint(parkPose);
                     pathState = 20;
                 }

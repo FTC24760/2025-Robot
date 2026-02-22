@@ -5,6 +5,8 @@ import static java.lang.Math.hypot;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
+import com.pedropathing.control.FilteredPIDFController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
@@ -22,7 +24,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import com.bylazar.configurables.annotations.Configurable;
 @TeleOp(name="Pedro TeleOp")
 public class PedroTeleopRed extends NewPrototypeTeleop {
+    @Configurable
+    static class turnPID {
+        public static double p= 1;
+        public static double i = 0;
+        public static double d = 0;
+        public static double t = 0;
+        public static double f = 0;
 
+    }
     Pose3D oldPose = new Pose3D(new Position(DistanceUnit.INCH, 0, 0, 0, 0), new YawPitchRollAngles(AngleUnit.RADIANS, 0, 0, 0 ,0));
     public static Pose frontScorePose = new Pose(84, 84, toRadians(45));
     public static Pose backScorePose = new Pose(84, 12, toRadians(68.2));
@@ -33,13 +43,16 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
     double flyWheelSpeed, intakeMotorSpeed, middleMotorSpeed;
     boolean isBlockerOpen;
     Gamepad lastGamepad;
+    FilteredPIDFController headingPIDF;
     Timer actionTimer;
+    double targetAngle = 0;
     @Override
     public void init() {
         super.init(); // from newprototypeteleop
         follower = Constants.createFollower(hardwareMap);
         actionTimer = new Timer();
         lastGamepad = gamepad1;
+        headingPIDF = new FilteredPIDFController(new FilteredPIDFCoefficients(turnPID.p, turnPID.i, turnPID.d, turnPID.t, turnPID.f));
     }
 
     @Override
@@ -57,7 +70,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
 
         // --- 2. Mode Selection ---
         isShootingMode = gamepad1.right_trigger > 0.05;
-        if (gamepad1.right_trigger > 0.9) flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
+        if (gamepad1.right_trigger > 0.9 || gamepad1.left_trigger > 0.9) flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
         isIntaking = (gamepad1.right_bumper);
 
 
@@ -89,12 +102,13 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         double driveY = -gamepad1.left_stick_y;
         double driveX = gamepad1.left_stick_x * 1.1;
         double driveTurn;
-        double targetAngle = 0; double botHeading = 0;
-        if (hypot(gamepad1.right_stick_x, gamepad1.right_stick_y) > 0.1) {
+
+        if (hypot(gamepad1.right_stick_x, gamepad1.right_stick_y) > 0.1)
             targetAngle = a360(atan2(-gamepad1.right_stick_y, gamepad1.right_stick_x)-toRadians(90));
-            botHeading = a360(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-        }
-        driveTurn = -a180(targetAngle - botHeading) * turnP.turn_P;
+        double botHeading = a360(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        double headingError = -a180(targetAngle - botHeading);
+        headingPIDF.updateError(headingError);
+        driveTurn = headingPIDF.run();
         //driveTurn = gamepad1.right_stick_x;
 
         if (gamepad1.dpad_up || gamepad1.dpad_down) {
@@ -187,7 +201,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
     }
     double a180(double angle) {
         while (angle > toRadians(180)) angle -= toRadians(360);
-        while (angle < -180) angle += toRadians(360);
+        while (angle < toRadians(-180)) angle += toRadians(360);
         return angle;
     }
     double a360(double angle) {
@@ -208,8 +222,5 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         }
     }
 
-    @Configurable
-    static class turnP {
-        public static double turn_P = 1;
-    }
+
 }
