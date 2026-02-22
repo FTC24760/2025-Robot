@@ -20,15 +20,15 @@ public class RedFrontScoring extends AutoExample {
     public Pose scorePose = new Pose(84.000, 84.000, Math.toRadians(45));
 
     public  Pose intake1Pose = new Pose(85, 88, Math.toRadians(0));
-    public  Pose intake1GrabPose = new Pose(126, 88, Math.toRadians(0));
+    public  Pose intake1GrabPose = new Pose(120, 88, Math.toRadians(0));
 
     public  Pose intake2Pose = new Pose(85, 70, Math.toRadians(0));
-    public  Pose intake2GrabPose = new Pose(126, 70, Math.toRadians(0));
+    public  Pose intake2GrabPose = new Pose(130, 70, Math.toRadians(0));
 
     public  Pose intake3Pose = new Pose(85, 44, Math.toRadians(0));
-    public  Pose intake3GrabPose = new Pose(126, 44, Math.toRadians(0));
+    public  Pose intake3GrabPose = new Pose(130, 44, Math.toRadians(0));
 
-    public  Pose parkPose = new Pose(96, 60, Math.toRadians(90));
+    public  Pose parkPose = new Pose(108, 84, Math.toRadians(90));
 
     public Paths myPaths;
 
@@ -96,8 +96,9 @@ public class RedFrontScoring extends AutoExample {
                 }
                 break;
             case 2:
-                shootingLogic(false, flyWheelTargetSpeed); // Spin up flywheels
-                if (actionTimer.getElapsedTimeSeconds() > 2) intakeLogic();
+                shootingLogic(false, flyWheelTargetSpeed); // Spin up
+                intakeLogic();
+                if (actionTimer.getElapsedTimeSeconds() < 1) intakeLogic();
                 if (actionTimer.getElapsedTimeSeconds() > 2.5) {
                     actionTimer.resetTimer();
                     pathState = 3;
@@ -105,6 +106,7 @@ public class RedFrontScoring extends AutoExample {
                 break;
             case 3:
                 tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
+                intakeLogic();
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
                     follower.followPath(myPaths.PathToIntake1);
                     actionTimer.resetTimer();
@@ -115,6 +117,7 @@ public class RedFrontScoring extends AutoExample {
                 double headingError = Math.abs(follower.getPose().getHeading() - intake1Pose.getHeading());
                 if (headingError < 0.07 || !follower.isBusy()) {
                     follower.followPath(myPaths.PathGrab1);
+                    actionTimer.resetTimer();
                     pathState = 5;
                 }
                 break;
@@ -123,10 +126,12 @@ public class RedFrontScoring extends AutoExample {
 
                 if (isAtPose(intake1GrabPose) || !follower.isBusy()) {
                     follower.followPath(myPaths.PathScore1);
+                    actionTimer.resetTimer();
                     pathState = 6;
                 }
                 break;
             case 6:
+                if (actionTimer.getElapsedTimeSeconds() < 0.5) intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();
@@ -145,12 +150,14 @@ public class RedFrontScoring extends AutoExample {
                 tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
                     follower.followPath(myPaths.PathToIntake2);
+                    actionTimer.resetTimer();
                     pathState = 9;
                 }
                 break;
             case 9:
                 if (isAtPose(intake2Pose) || !follower.isBusy()) {
                     follower.followPath(myPaths.PathGrab2);
+                    actionTimer.resetTimer();
                     pathState = 10;
                 }
                 break;
@@ -159,10 +166,12 @@ public class RedFrontScoring extends AutoExample {
 
                 if (isAtPose(intake2GrabPose) || !follower.isBusy()) {
                     follower.followPath(myPaths.PathScore2);
+                    actionTimer.resetTimer();
                     pathState = 11;
                 }
                 break;
             case 11:
+                if (actionTimer.getElapsedTimeSeconds() < 0.5) intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();
@@ -180,8 +189,9 @@ public class RedFrontScoring extends AutoExample {
             case 13:
                 tripleShoot(actionTimer, flyWheelTargetSpeed); // Score
                 if (actionTimer.getElapsedTimeSeconds() > 2.2) {
-                    follower.followPath(myPaths.PathToIntake3);
-                    pathState = 19;//14;
+                    follower.followPath(myPaths.PathPark);//followPath(myPaths.PathToIntake3);
+                    actionTimer.resetTimer();
+                    pathState = 20;//14;
                 }
                 break;
             case 14:
@@ -195,10 +205,12 @@ public class RedFrontScoring extends AutoExample {
 
                 if (isAtPose(intake3GrabPose) || !follower.isBusy()) {
                     follower.followPath(myPaths.PathScore3);
+
                     pathState = 16;
                 }
                 break;
             case 16:
+                if (actionTimer.getElapsedTimeSeconds() < 0.5) intakeLogic();
                 if (isAtPose(scorePose) || !follower.isBusy()) {
                     follower.holdPoint(scorePose);
                     actionTimer.resetTimer();

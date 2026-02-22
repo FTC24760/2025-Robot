@@ -26,7 +26,11 @@ public class Constants {
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0, 0.01))
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0.00001, 0.01, 0.01));
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(
+            0.99,
+            100,
+            1,
+            1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

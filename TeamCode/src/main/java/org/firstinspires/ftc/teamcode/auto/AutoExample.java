@@ -86,7 +86,7 @@ public class AutoExample extends PedroTeleopRed {
     }
     void pathLogic() {}
     void tripleShoot(Timer pathTimer, double flyWheelTargetSpeed) {
-        if ((pathTimer.getElapsedTimeSeconds()%1) < 0.2) {
+        if ((pathTimer.getElapsedTimeSeconds()%1) < 0.15) {
             shootingLogic(true, flyWheelTargetSpeed);
 
         }

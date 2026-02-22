@@ -182,7 +182,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
     }
     public void intakeLogic() {
         intakeMotorSpeed = 1;
-        middleMotorSpeed = 0.8;
+        middleMotorSpeed = 1;
     }
     public void updateMotors() {
         leftFlywheel.setVelocity(flyWheelSpeed);
