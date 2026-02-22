@@ -56,7 +56,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         if (gamepad1.options) imu.resetYaw();
 
         // --- 2. Mode Selection ---
-        isShootingMode = gamepad1.right_trigger > 0.1;
+        isShootingMode = gamepad1.right_trigger > 0.05;
         if (gamepad1.right_trigger > 0.9) flyWheelTargetSpeed = FAST_SHOOTER_VELOCITY;
         isIntaking = (gamepad1.right_bumper);
 
@@ -112,6 +112,8 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         // --- 5. Telemetry ---
         telemetry.addData("Mode", isShootingMode ? "SHOOTING" : (isIntaking ? "INTAKING" : "DRIVER"));
         telemetry.addData("Shooter Vel", leftFlywheel.getVelocity());
+        telemetry.addData("Shooter target Vel", flyWheelTargetSpeed);
+        telemetry.addData("drive error", toDegrees(-a180(targetAngle - botHeading)));
         telemetry.addData("Target angle", toDegrees(targetAngle));
         telemetry.addData("Bot Heading", toDegrees(botHeading));
         telemetry.addData("Drive TUrn", driveTurn);
@@ -156,7 +158,7 @@ public class PedroTeleopRed extends NewPrototypeTeleop {
         isBlockerOpen = false;
     }
     public void shootingLogic(boolean fire, double flyWheelTargetSpeed) {
-        flyWheelSpeed = SHOOTER_VELOCITY;
+        flyWheelSpeed = flyWheelTargetSpeed;
         limelight.pipelineSwitch(PIPELINE_MEGATAG);
         if (fire) {
             middleMotorSpeed = 1.0;
