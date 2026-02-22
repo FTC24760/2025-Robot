@@ -42,7 +42,6 @@ public class NewPrototypeTeleop extends OpMode {
 
     // --- Constants ---
     // Restored to High Velocity as requested (requires tuned PIDF on motor)
-    public static final double CLOSE_SHOOTER_VELOCITY = 2000;
     public static final double SHOOTER_VELOCITY = 1950;
     public static final double FAST_SHOOTER_VELOCITY = 2320;
     // Shooter middle motor power - while shooting
